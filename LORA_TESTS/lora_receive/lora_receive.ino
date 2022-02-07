@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <LoRa.h>
 
-#define ESP8266  // comment if you want to use the sketch on a Arduino board
+#define ESP8266  // add gate check for when using arduinoboards
 //#define OLED        // comment if you do not have a OLED display
 
 const long freq = 868E6;

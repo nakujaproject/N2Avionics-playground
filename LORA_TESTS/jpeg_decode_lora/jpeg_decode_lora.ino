@@ -122,6 +122,7 @@ void jpegRender(int xpos, int ypos) {
 //====================================================================================
 //   Print information decoded from the Jpeg image
 //====================================================================================
+// printing this info is optional
 void jpegInfo() {
 
   Serial.println("===============");

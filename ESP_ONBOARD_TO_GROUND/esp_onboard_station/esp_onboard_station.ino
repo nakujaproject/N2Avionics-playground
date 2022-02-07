@@ -14,8 +14,8 @@ Adafruit_MPU6050 mpu;
 Adafruit_BMP085 bmp;
 
 // WIFI credentials
-const char* ssid = "iPIC-WIRELESS";
-const char* password = "987654321jica";
+const char* ssid = "";
+const char* password = "";
 
 // create web server object on port 80
 WebServer server(80);

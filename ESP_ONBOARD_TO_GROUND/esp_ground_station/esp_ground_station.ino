@@ -1,9 +1,9 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-// connect to same wifi network
-const char* ssid = "iPIC-WIRELESS";
-const char* password = "987654321jica";
+// connect to wifi network
+const char* ssid = "";
+const char* password = "";
 
 // Server ip address with URL paths. Configure this for each sensor data we want to receive
 const char* server_url = "http://10.2.43.62/getdata";

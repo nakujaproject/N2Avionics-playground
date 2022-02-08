@@ -48,7 +48,6 @@ void loop() {
       message = message + ((char)LoRa.read());
 
       // logging code to capture the timestamp that the message was received
-      
     }
     
     String rssi = "\"RSSI\":\"" + String(LoRa.packetRssi()) + "\"";

@@ -6,27 +6,27 @@
 #include <WiFi.h>
 
 
-char ssid[] = "iPIC-WIRELESS";
-char pass[] = "987654321jica";
+const char* ssid = "groung";
+const char* pass = "123456789";
 
 void setup() {
+  Serial.begin(115200);
   WiFi.begin(ssid, pass);
 
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("Couldn't get a wifi connection");
-    while(true);
-  }
-  
-  // if you are connected, print out info about the connection:
-  else {
-     // print the received signal strength:
-    long rssi = WiFi.RSSI();
-    Serial.print("RSSI:");
-    Serial.println(rssi);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Connecting...");
+    delay(500);
   }
 
+  Serial.println("Connected to "); Serial.print(ssid);
+  
 }
 
 void loop() {
+
+  // print the received signal strength if connected
+    long rssi = WiFi.RSSI();
+    Serial.print("RSSI:");
+    Serial.println(rssi);
   
 }

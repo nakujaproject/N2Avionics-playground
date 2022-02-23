@@ -23,7 +23,7 @@ void printToSerial();
 void kalman();
 void connectToWifi();
 void logToSD();
-void detectLiftoff(int altitude);
+void detectLiftoff(uint altitude);
 void detectApogee();
 void deployParachute();
 
@@ -75,6 +75,9 @@ void getSensorReadings(){
 
   // read altitude
   altitude = barometer.readAltitude(SEA_LEVEL_PRESSURE);
+
+  // convert altitude to unsigned integer
+  altitude = (uint)altitude;
 
   // read x axis acceleration
   ax = a.acceleration.x;
@@ -140,7 +143,7 @@ void logToSD(){
 	*/
 }
 
-void detectLiftoff(int altitude){
+void detectLiftoff(uint altitude){
   /*
 	* ==================== Detect when the rocket has launched =====================
   * If the current altitude is greater than the previous by 50cm

@@ -25,17 +25,23 @@ void Task1Code(void* pvParameters){
       // read sensors
     getSensorReadings();
   
-    // print Sensor values
+    // print Sensor values for debugging
     printToSerial();
 	
-	// Write sensor reading to SD card
-	logToSD();
+    // Write sensor reading to SD card
+    logToSD();
  
   }
+
+
 }
 
 void Task2Code(void* pvParameters){
   for(;;){
-    Serial.println(altitude);
+    kalmanUpdate();
+    detectLiftoff();
+    detectApogee();
+    deployParachute();
+
   }
 }

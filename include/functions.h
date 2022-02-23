@@ -23,6 +23,9 @@ void printToSerial();
 void kalman();
 void connectToWifi();
 void logToSD();
+void detectLiftoff(int altitude);
+void detectApogee();
+void deployParachute();
 
 /*
  * ==================== CORE TASKS SEPARATION ====================
@@ -88,7 +91,7 @@ void printToSerial(){
   Serial.println(Data);  
 }
 
-void kalman(){
+void kalmanUpdate(){
     //Measurement matrix
     BLA::Matrix<2, 1> Z = {altitude,
                            ay};
@@ -135,6 +138,25 @@ void logToSD(){
 	/*
 	* ==================== Write flight data to SD card =====================
 	*/
+}
+
+void detectLiftoff(int altitude){
+  /*
+	* ==================== Detect when the rocket has launched =====================
+  * If the current altitude is greater than the previous by 50cm
+  * report lift-off
+	*/
+  previous_altitude = altitude;
+  current_altitude = barometer.readAltitude(SEA_LEVEL_PRESSURE);
+
+  if(isLiftOff == false){
+     if((current_altitude - previous_altitude) > LIFT_OFF_DEVIATION){
+        // lift off detected
+        Serial.print("Lift Off!"); // log this to somewhere
+        isLiftOff = true;
+    }
+  }
+
 }
 
 #endif

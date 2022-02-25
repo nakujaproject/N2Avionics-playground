@@ -7,33 +7,33 @@
 #include <BasicLinearAlgebra.h>
 #include <WiFi.h>
 #include <SD.h>
+#include<CircularBuffer.h>
+#include <HTTPClient.h>
+#include <ESPAsyncWebServer.h>
+
 #include "global_variables.h" // header file containing variables
 #include "defs.h" // header file containing constants
 
 Adafruit_BMP085 barometer; 
 Adafruit_MPU6050 accelerometer;
 
+
 using namespace BLA;
 /* 
 * ==================== FUNCTION DECLARATION ==================== 
 */
 void initializeComponents();
-void getSensorReadings();
+String getSensorReadings();
 void printToSerial();
-void kalman();
 void connectToWifi();
 void logToSD();
-void detectLiftoff(uint altitude);
+void detectLiftoff();
 void detectApogee();
 void deployParachute();
+void createAcessPoint();
+// void serveData();
+String request_server_data(const char* server_name);
 
-/*
- * ==================== CORE TASKS SEPARATION ====================
- */
-TaskHandle_t Task1;
-TaskHandle_t Task2;
-void Task1code(void* pvParameters);
-void Task2code(void* pvParameters);
 
 /*
  * ==================== FUNCTION DEFINITIONS ====================
@@ -47,6 +47,7 @@ void initializeComponents(){
 
   Serial.begin(BAUD_RATE);
 
+ 
   // Initialize BMP pressure sensor
   Serial.println("Barometer Check...");
   if(!barometer.begin()){
@@ -69,15 +70,15 @@ void initializeComponents(){
   Serial.println("Accelerometer OK...");
 }
  
-void getSensorReadings(){
+String getSensorReadings(){
   sensors_event_t a, g, temp;
   accelerometer.getEvent(&a, &g, &temp);
 
   // read altitude
-  altitude = barometer.readAltitude(SEA_LEVEL_PRESSURE);
+  altitude = barometer.readAltitude(SEA_LEVEL_PRESSURE_HPA * 100);
 
   // convert altitude to unsigned integer
-  altitude = (uint)altitude;
+  // altitude = (int)altitude;
 
   // read x axis acceleration
   ax = a.acceleration.x;
@@ -86,80 +87,111 @@ void getSensorReadings(){
   ay = a.acceleration.y;
 
   // read z axis acceleration
-  az = a.acceleration.z;  
+  az = a.acceleration.z;
+
+  // append data to sata_message
+  data_message = String("Altitude: ") + String(altitude) + ", " + String("Acc-x: ") + String(ax) + ", " + String("Acc-y: ") + String(ay) + ", " + String("Acc-z: ") + String(az) + "\n";
+  return data_message;
 }
 
 void printToSerial(){
-  Data = String(altitude) + "," + String(ax) + "," + String(ay) + "," + String(az);
-  Serial.println(Data);  
+  //Data = String(altitude) + "," + String(ax) + "," + String(ay) + "," + String(az);
+  Serial.print("Altitude:"); Serial.print(altitude); Serial.println();
+  Serial.print("ax: "); Serial.print(ax); Serial.println();
+  Serial.print("ay: "); Serial.print(ay); Serial.println();
+  Serial.print("az: "); Serial.print(az); Serial.println();
+  Serial.println();
+
+  delay(100);
 }
 
-void kalmanUpdate(){
-    //Measurement matrix
-    BLA::Matrix<2, 1> Z = {altitude,
-                           ay};
-                           
-    //Predicted state estimate
-    BLA::Matrix<3, 1> x_hat_minus = A * x_hat;
-    
-    //Predicted estimate covariance
-    BLA::Matrix<3, 3> P_minus = A * P * (~A) + Q;
-    
-    BLA::Matrix<3, 2> K = P_minus * (~H) * (H * P_minus * ((~H) + R)).Inverse(); // inverse here
-    
-    //Measurement residual
-    Y = Z - (H * x_hat_minus);
-    
-    //Updated state estimate
-    x_hat = x_hat_minus + K * Y;
-    
-    //Updated estimate covariance
-    P = (I - K * H) * P_minus;
-    Y = Z - (H * x_hat_minus);
+// void connectToWifi(){
+//   WiFi.begin(ssid, key);
 
-    s = x_hat(0); // displacement
-    v = x_hat(1); // velocity
-    a = x_hat(2); // acceleration
-}
+//   // check if connection okay
+//   while(WiFi.status() != WL_CONNECTED){
+//     Serial.println("Establishing connection to WiFi...");
+//     delay(SHORT_DELAY);
+//   }
 
-void connectToWifi(){
-  WiFi.begin(ssid, key);
-
-  // check if connection okay
-  while(WiFi.status() != WL_CONNECTED){
-    Serial.println("Establishing connection to WiFi...");
-    delay(SHORT_DELAY);
-  }
-
-  // connection okay
-  Serial.println("Connection established...");
-  Serial.println(WiFi.localIP()); 
+//   // connection okay
+//   Serial.print("Connection established to "); Serial.print(ssid);
+//   Serial.println(WiFi.localIP()); 
   
-}
+// }
 
 void logToSD(){
 	/*
 	* ==================== Write flight data to SD card =====================
 	*/
+
+
 }
 
-void detectLiftoff(uint altitude){
+void detectLiftoff(){
   /*
 	* ==================== Detect when the rocket has launched =====================
   * If the current altitude is greater than the previous by 50cm
   * report lift-off
 	*/
-  previous_altitude = altitude;
-  current_altitude = barometer.readAltitude(SEA_LEVEL_PRESSURE);
+  current_altitude = barometer.readAltitude(SEA_LEVEL_PRESSURE_HPA * 100);
 
-  if(isLiftOff == false){
-     if((current_altitude - previous_altitude) > LIFT_OFF_DEVIATION){
+  if(is_lift_off == false){
+     if((current_altitude - CURRENT_ALTITUDE) > LIFT_OFF_DEVIATION){   
+        Serial.println("(0) Waiting for lift-off...");
+
+        Serial.println(current_altitude);
+
         // lift off detected
-        Serial.print("Lift Off!"); // log this to somewhere
-        isLiftOff = true;
+        Serial.print("Lift Off!"); // log this to some file
+        is_lift_off = true;
     }
   }
+}
+
+void detectApogee(){
+  /*
+  * Detect point where velocity is at 0
+  * v = u + at
+  */
+  
+  Serial.println("(1) Waiting for apogee...");
+
+  // circular buffer 
+
 
 }
+
+void createAccessPoint(){
+  // Connect to Wi-Fi network with SSID and password
+  Serial.print("Setting Ground Station WiFi...");
+  delay(1000);
+
+  // Remove the password parameter, if you want the AP (Access Point) to be open
+  WiFi.softAP(ssid, key);
+
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("ssid:"); Serial.print(ssid); Serial.println();
+  Serial.print("key:"); Serial.print(key); Serial.println();
+  Serial.print("Rocket IP address: "); Serial.print(IP); Serial.println();
+  
+  server.begin();
+}
+
+// void serveData(){
+
+//   unsigned long currentMillis = millis();
+//   if(currentMillis - previousMillis >= interval){
+//     if(WiFi.status() != WL_CONNECTED){
+//       // wifi not connected
+//       Serial.println("Wifi disconnected. Please try reconnecting...");
+
+//       Serial.println("DATA: " + sensor_data);  //change this to send all required data at once
+//     }
+//   }
+
+// }
+
+
 
 #endif

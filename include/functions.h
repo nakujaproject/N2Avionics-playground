@@ -157,10 +157,30 @@ void detectApogee(){
   
   Serial.println("(1) Waiting for apogee...");
 
-  // circular buffer 
+  using index_t = decltype(altitude_buffer)::index_t; // ensure right type for the index variable
 
+  // check for apogee every 600 ms (600ms is an arbitrary value. can be changed) 
+  if(millis() - tm > 600){
+    // insert the most recent value into the circular buffer
+    altitude_buffer.push(altitude);
+    
+    // check for apogee
+    if(altitude_buffer[altitude_buffer.size()] < altitude_buffer[altitude_buffer.size() - 1]){
+      // if the most recent altitude value is less than the previous value, 
+      // the rocket is descending. Apogee reached
+      // call the function to deploy parachute
+      
+    }else{
+      // rocket still in ascent
+      // apogee not reached yet
+      Serial.println("Waiting for apogee...");
 
+    }    
+  }
 }
+
+
+
 
 void createAccessPoint(){
   // Connect to Wi-Fi network with SSID and password
@@ -177,20 +197,6 @@ void createAccessPoint(){
   
   server.begin();
 }
-
-// void serveData(){
-
-//   unsigned long currentMillis = millis();
-//   if(currentMillis - previousMillis >= interval){
-//     if(WiFi.status() != WL_CONNECTED){
-//       // wifi not connected
-//       Serial.println("Wifi disconnected. Please try reconnecting...");
-
-//       Serial.println("DATA: " + sensor_data);  //change this to send all required data at once
-//     }
-//   }
-
-// }
 
 
 

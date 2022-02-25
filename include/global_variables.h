@@ -44,8 +44,9 @@ uint current_altitude;
 */
 bool is_apogee = false;
 
-unsigned long initial_velocity;
-unsigned long current_velocity;
-const double t = 10;
+// circular buffer creation
+CircularBuffer<float, 5> altitude_buffer;
+
+unsigned long tm;
 
 #endif

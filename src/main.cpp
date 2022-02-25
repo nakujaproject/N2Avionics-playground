@@ -14,7 +14,6 @@ TaskHandle_t Task2;
 void Task1Code(void* pvParameters){
   for(;;){
 
-
       // read sensors
     getSensorReadings();
 
@@ -40,6 +39,7 @@ void Task2Code(void* pvParameters){
 
 
 void setup() {
+  tm = millis(); // read current time when this function is calles
   
 
   initializeComponents();

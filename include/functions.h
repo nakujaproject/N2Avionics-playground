@@ -179,9 +179,6 @@ void detectApogee(){
   }
 }
 
-
-
-
 void createAccessPoint(){
   // Connect to Wi-Fi network with SSID and password
   Serial.print("Setting Ground Station WiFi...");

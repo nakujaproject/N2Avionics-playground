@@ -1,4 +1,4 @@
-#ifndef FUNCTIONS_H
+le#ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
 #include <Adafruit_BMP085.h>
@@ -174,6 +174,7 @@ void detectApogee(){
       // rocket still in ascent
       // apogee not reached yet
       Serial.println("Waiting for apogee...");
+      // todo: check apogee here
 
     }    
   }

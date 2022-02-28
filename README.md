@@ -27,7 +27,6 @@ code successfully.
 ### 1. Folders Description
 | Folder  | Description   |
 |---|---|
-|  cmake-build-debug | Contains debug files if using Clion IDE   |
 |  include | Contains header files   |
 |  lib | Project libraries|
 |main | Contains the code for ground station micro-controller   |

@@ -1,4 +1,4 @@
-le#ifndef FUNCTIONS_H
+#ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
 #include <Adafruit_BMP085.h>
@@ -10,6 +10,9 @@ le#ifndef FUNCTIONS_H
 #include<CircularBuffer.h>
 #include <HTTPClient.h>
 #include <ESPAsyncWebServer.h>
+#include <FS.h>
+#include <SD.h>
+#include <SPI.h>
 
 #include "global_variables.h" // header file containing variables
 #include "defs.h" // header file containing constants
@@ -26,7 +29,8 @@ void initializeComponents();
 String getSensorReadings();
 void printToSerial();
 void connectToWifi();
-void logToSD();
+void appendToFile(fs::FS, const char*, const char*);
+void logToSD(String);
 void detectLiftoff();
 void detectApogee();
 void deployParachute();
@@ -56,7 +60,7 @@ void initializeComponents(){
       delay(SHORT_DELAY);
     }
   }
-  Serial.println("Barometer OK..."); // todo : these checks to be logged and relayed to ground as logs
+  Serial.println("Barometer OK..."); // todo : log
 
   // Initialize MPU6050 accelerometer
   Serial.println("Accelerometer Check...");
@@ -68,6 +72,24 @@ void initializeComponents(){
   }
   
   Serial.println("Accelerometer OK...");
+
+  // Initialize SD card
+  Serial.println("SD card Check...");
+  if(!SD.begin()){
+    Serial.println("SD card not found...");
+    return;
+  } 
+
+  // check mounted card type
+  uint8_t card_type = SD.cardType();
+  if (card_type == CARD_NONE){
+    Serial.println("No SD card attached..."); // todo: log
+    return;
+  }
+  
+  // SD card exists
+  Serial.println("SD card OK...");
+  
 }
  
 String getSensorReadings(){
@@ -120,12 +142,39 @@ void printToSerial(){
   
 // }
 
-void logToSD(){
+void logToSD(String data){
 	/*
 	* ==================== Write flight data to SD card =====================
+  MICROSD MODULE PINOUT
+  3V3 -> 3v3
+  CS -> GPIO5
+  MOSI -> GPIO23
+  CLK -> GPIO18
+  MISO -> GPIO19
+  GND -> GND
 	*/
 
+  // convert data message from string to c-type string for use with appendToFile function
+  const char* data_message_char = data_message.c_str();
 
+  // todo: figure out which pins are on the actual PCB computer
+  appendToFile(SD, "/flight_data.txt", data_message_char);
+
+}
+
+void appendToFile(fs::FS &fs, const char* path, const char* data){
+  // the file to write to must first be created in the SD card using a PC
+  Serial.printf("Appending to file: %s\n", path);
+
+  File file = fs.open(path, FILE_APPEND);
+  if(!file){
+    Serial.println("Failed to open file for reading.."); // todo: log
+    return;
+  } else if(file.print(data)){
+    Serial.println("Message appended"); // todo: log
+  }else{
+    Serial.println("Failed writeing to file");  // todo: log
+  }
 }
 
 void detectLiftoff(){

@@ -162,6 +162,7 @@ void logToSD(String data){
 
 }
 
+
 void appendToFile(fs::FS &fs, const char* path, const char* data){
   // the file to write to must first be created in the SD card using a PC
   Serial.printf("Appending to file: %s\n", path);
@@ -208,8 +209,8 @@ void detectApogee(){
 
   using index_t = decltype(altitude_buffer)::index_t; // ensure right type for the index variable
 
-  // check for apogee every 600 ms (600ms is an arbitrary value. can be changed) 
-  if(millis() - tm > 600){
+  // check for apogee every 500 ms (600ms is an arbitrary value. can be changed) 
+  if(millis() - tm > 500){
     // insert the most recent value into the circular buffer
     altitude_buffer.push(altitude);
     

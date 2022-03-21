@@ -9,6 +9,8 @@
 
 #define BAUD_RATE 115200
 
+#define PORT 4210
+
 // value to detect lif off deviation
 #define LIFT_OFF_DEVIATION 2 // ideal: 50 cm
 

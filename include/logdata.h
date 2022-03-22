@@ -1,27 +1,23 @@
 #ifndef LOGDATA_H
 #define LOGDATA_H
 
-#include <BasicLinearAlgebra.h>
-
+#include <mySD.h>
+#include <string>
+#include "defs.h"
 #define LOG_FILE "loggeddata.txt"
 
-struct LogData {
-    float counter;
-    float altitude;
-    float ax;
-    float ay;
-    float az;
-    float gx;
-    float gy;
-    float gz;
-    float filtered_s;
-    float filtered_v;
-    float filtered_a;
-    float states;
-    float longitude;
-    float latitude;
+File dataFile;
+/*
+* ==================== Write flight data to SD card =====================
+MICROSD MODULE PINOUT
+3V3 -> 3v3
+CS -> GPIO5
+MOSI -> GPIO23
+CLK -> GPIO18
+MISO -> GPIO19
+GND -> GND
+*/
 
-}
 void startWriting(){
     dataFile = SD.open(LOG_FILE, FILE_WRITE);
     if (dataFile)
@@ -57,8 +53,8 @@ void appendFile(const char *message){
 
 // Write the sensor readings on the SD card
 void logSDCard(LogData ld) {
-    String dataMessage
-    dataMessage = String(ld.counter) + "," + String(ld.altitude) + "," + String(ld.ax) + "," + String(ld.ay) + "," + String(ld.az) + "," + String(ld.gx) + "," + String(ld.gy) + "," + String(ld.gz) + "," + String(ld.filtered_s) + "," + String(ld.filtered_v) + "," + String(ld.filtered_a) + "," + String(ld.states) + "," + String(ld.longitude) + "," + String(ld.latitude) ",";
+    String dataMessage;
+    dataMessage = String(ld.counter) + "," + String(ld.altitude) + "," + String(ld.ax) + "," + String(ld.ay) + "," + String(ld.az) + "," + String(ld.gx) + "," + String(ld.gy) + "," + String(ld.gz) + "," + String(ld.filtered_s) + "," + String(ld.filtered_v) + "," + String(ld.filtered_a) + "," + String(ld.states) + "," + String(ld.longitude) + "," + String(ld.latitude) + ",";
     appendFile(dataMessage.c_str());
 }
 

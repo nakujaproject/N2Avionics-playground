@@ -2,14 +2,9 @@
 #define KALMANFILTER_H
 
 #include <BasicLinearAlgebra.h>
+#include "defs.h"
 
 using namespace BLA;
-
-struct filter_vals {
-    float displacement;
-    float velocity;
-    float acceleration;
-}
 
 float q = 0.0001;
 
@@ -51,8 +46,8 @@ BLA::Matrix<2, 1> Y = {0.0,
                        0.0};
 
 
-struct filter_vals kalmanUpdate(float altitude, float az){
-    struct filter_vals return_val
+struct FilteredValues kalmanUpdate(float altitude, float az){
+    struct FilteredValues return_val;
     //Measurement matrix
 
     BLA::Matrix<2, 1> Z = {altitude,
@@ -62,7 +57,7 @@ struct filter_vals kalmanUpdate(float altitude, float az){
     //Predicted estimate covariance
     BLA::Matrix<3, 3> P_minus = A * P * (~A) + Q;
     //Kalman gain
-    BLA::Matrix<3, 2> K = P_minus * (~H) * ((H * P_minus * (~H) + R)).Inverse();
+    BLA::Matrix<3, 2> K = P_minus * (~H) * ((H * P_minus * (~H) + R));
     //Measurement residual
     Y = Z - (H * x_hat_minus);
     //Updated state estimate
@@ -75,7 +70,7 @@ struct filter_vals kalmanUpdate(float altitude, float az){
     return_val.velocity = x_hat(1);
     return_val.acceleration = x_hat(2);
  
-    return return_val
+    return return_val;
     
 }
 

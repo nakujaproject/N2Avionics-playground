@@ -9,6 +9,7 @@
 #include <SD.h>
 #include<CircularBuffer.h>
 #include <HTTPClient.h>
+#include <WiFiUdp.h>
 #include <ESPAsyncWebServer.h>
 #include <FS.h>
 #include <SD.h>
@@ -19,7 +20,7 @@
 
 Adafruit_BMP085 barometer; 
 Adafruit_MPU6050 accelerometer;
-
+WiFiUDP Udp;
 
 using namespace BLA;
 /* 
@@ -35,7 +36,7 @@ void detectLiftoff();
 void detectApogee();
 void deployParachute();
 void createAcessPoint();
-// void serveData();
+void serveData(int counter, float altitude, float ax, float ay, float az, float gx, float gy, float gz, float s, float v, float a, int currentState, float longitude, float latitude);
 String request_server_data(const char* server_name);
 
 
@@ -284,7 +285,37 @@ int checkGround(int v,int s){
   if(v==0 && s==0){
      return 5; 
   }
+void serveData(
+    int counter,
+    float altitude,
+    float ax,
+    float ay,
+    float az,
+    float gx,
+    float gy,
+    float gz,
+    float s,
+    float v,
+    float a,
+    int currentState,
+    float longitude,
+    float latitude)
+{
+  Udp.beginPacket({192, 168, 4, 255}, PORT);
 
+  // payload
+
+  Udp.printf("Counter : %d \n Altitude : %.3f \n ax : %.3f \n ay : %.3f \n az  : %.3f \n gx  : %.3f \n gy  : %.3f \n gz  : %.3f \n s : %.3f \n v : %.3f \n a : %.3f \n Current State  : %d \n Longitude  : %.3f \n Latitude  : %.3f \n", counter, altitude, ax, ay, az, gx, gy, gz, s, v, a, currentState, longitude, latitude);
+
+  if (!Udp.endPacket())
+  {
+    Serial.println("NOT SENT!");
+  }
+  else
+  {
+    Serial.println("SENT!!");
+  }
+}
 }
 // check state functions end
 

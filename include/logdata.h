@@ -46,7 +46,7 @@ void appendFile(const char *message){
     }
     if (dataFile.println(message))
     {
-       // Serial.println("Message appended\n");
+       Serial.println("Message appended\n");
     }
     else
     {

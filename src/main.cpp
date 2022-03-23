@@ -3,10 +3,6 @@
 /*
  * Check brownout issues to prevent ESP32 from re-booting unexpectedly
  */
-
-#include "soc/soc.h"
-#include "soc/rtc_cntl_reg.h"
-
 #include "../include/functions.h"
 #include "../include/readsensors.h"
 #include "../include/kalmanfilter.h"
@@ -48,7 +44,7 @@ int state = 0;
 void setup()
 {
   // init_components();
-  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+  // WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
   Serial.begin(BAUD_RATE);
   Serial.println("Bange is boss");
   createAccessPoint();
@@ -56,15 +52,15 @@ void setup()
 
 void loop()
 {
-  struct SensorReadings readings;
-  struct FilteredValues filtered_values;
-  readings = get_readings();
-  filtered_values = kalmanUpdate(readings.altitude, readings.az);
-  state = checkState(filtered_values.displacement, filtered_values.velocity, counter, state);
-  counter = counter + 1;
+  // struct SensorReadings readings;
+  // struct FilteredValues filtered_values;
+  // readings = get_readings();
+  // filtered_values = kalmanUpdate(readings.altitude, readings.az);
+  // state = checkState(filtered_values.displacement, filtered_values.velocity, counter, state);
+  // counter = counter + 1;
 
   struct LogData ld;
-  ld.counter = counter;
+  ld.counter = 1;
   ld.altitude = 1.2;
   ld.ax = 1.2;
   ld.ay = 1.2;

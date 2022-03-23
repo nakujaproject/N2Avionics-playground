@@ -4,13 +4,14 @@
 #include "defs.h" // header file containing constants
 #include <WiFi.h>
 
-const char *ssid = "ground-station";
-const char *key = "password";
+const char *ssid = "ap";
+const char *key = "1234";
 
 void createAccessPoint()
 {
   // Connect to Wi-Fi network with SSID and password
   Serial.print("Setting Ground Station WiFi...");
+  WiFi.mode(WIFI_AP);
 
   delay(1000);
 

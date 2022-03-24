@@ -3,8 +3,7 @@
 
 #include <WiFiUdp.h>
 #include "defs.h"
-
-#include <ESPAsyncWebServer.h>
+#include "kalmanfilter.h"
 
 #include <WebServer.h>
 #include <ArduinoJson.h>
@@ -49,10 +48,10 @@ void serve_data()
   doc["longitude"] = ld.longitude;
   doc["latitude"] = ld.latitude;
 
+  String json;
+  serializeJson(doc, json);
 
-  serializeJson(doc, Serial);
-
-  server.send(200, "application/json", doc.c_string());
+  server.send(200, "application/json", json);
 }
 void handle_on_connect()
 {

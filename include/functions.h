@@ -4,8 +4,8 @@
 #include "defs.h" // header file containing constants
 #include <WiFi.h>
 
-const char *ssid = "ap";
-const char *key = "1234";
+const char *ssid = "appendix";
+const char *key = "123456789";
 
 void createAccessPoint()
 {

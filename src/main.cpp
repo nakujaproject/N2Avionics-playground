@@ -41,24 +41,17 @@
 
 int counter = 0;
 int state = 0;
+
 void setup()
 {
   // init_components();
-  // WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
   Serial.begin(BAUD_RATE);
-  Serial.println("Bange is boss");
   createAccessPoint();
+  setupServer();
 }
 
-void loop()
+struct LogData readData()
 {
-  // struct SensorReadings readings;
-  // struct FilteredValues filtered_values;
-  // readings = get_readings();
-  // filtered_values = kalmanUpdate(readings.altitude, readings.az);
-  // state = checkState(filtered_values.displacement, filtered_values.velocity, counter, state);
-  // counter = counter + 1;
-
   struct LogData ld;
   ld.counter = 1;
   ld.altitude = 1.2;
@@ -75,5 +68,10 @@ void loop()
   ld.longitude = 2.4;
   ld.latitude = 3.2;
 
-  serveData(ld);
+  return ld;
+}
+
+void loop()
+{
+  server.handleClient();
 }

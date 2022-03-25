@@ -18,7 +18,8 @@ MISO -> GPIO19
 GND -> GND
 */
 
-void startWriting(){
+void startWriting()
+{
     dataFile = SD.open(LOG_FILE, FILE_WRITE);
     if (dataFile)
     {
@@ -33,7 +34,8 @@ void startWriting(){
 }
 
 // Append data to the SD card (DON'T MODIFY THIS FUNCTION)
-void appendFile(const char *message){
+void appendFile(const char *message)
+{
     dataFile = SD.open(LOG_FILE, FILE_WRITE);
     if (!dataFile)
     {
@@ -42,7 +44,7 @@ void appendFile(const char *message){
     }
     if (dataFile.println(message))
     {
-       Serial.println("Message appended\n");
+        Serial.println("Message appended\n");
     }
     else
     {
@@ -52,9 +54,10 @@ void appendFile(const char *message){
 }
 
 // Write the sensor readings on the SD card
-void logSDCard(LogData ld) {
+void logSDCard(LogData ld)
+{
     String dataMessage;
-    dataMessage = String(ld.counter) + "," + String(ld.altitude) + "," + String(ld.ax) + "," + String(ld.ay) + "," + String(ld.az) + "," + String(ld.gx) + "," + String(ld.gy) + "," + String(ld.gz) + "," + String(ld.filtered_s) + "," + String(ld.filtered_v) + "," + String(ld.filtered_a) + "," + String(ld.states) + "," + String(ld.longitude) + "," + String(ld.latitude) + ",";
+    dataMessage = String(ld.counter) + "," + String(ld.altitude) + "," + String(ld.ax) + "," + String(ld.ay) + "," + String(ld.az) + "," + String(ld.gx) + "," + String(ld.gy) + "," + String(ld.gz) + "," + String(ld.filtered_s) + "," + String(ld.filtered_v) + "," + String(ld.filtered_a) + "," + String(ld.state) + "," + String(ld.longitude) + "," + String(ld.latitude) + ",";
     appendFile(dataMessage.c_str());
 }
 

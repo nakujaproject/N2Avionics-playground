@@ -14,7 +14,7 @@
 Adafruit_BMP085 bmp;
 Adafruit_MPU6050 mpu;
 
-//function to initialize sensors and the sd card module
+// function to initialize sensors and the sd card module
 void init_components()
 {
     Serial.begin(BAUD_RATE);
@@ -63,7 +63,7 @@ void init_components()
     mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
 }
 
-struct  SensorReadings get_readings()
+struct SensorReadings get_readings()
 {
     struct SensorReadings return_val;
     sensors_event_t a, g, temp;
@@ -72,6 +72,12 @@ struct  SensorReadings get_readings()
     return_val.ax = a.acceleration.x + 0.35;
     return_val.ay = a.acceleration.y - 0.3;
     return_val.az = a.acceleration.z - 10.31;
+
+    // TODO: calibrate gyro
+    return_val.ax = g.gyro.x;
+    return_val.ay = g.gyro.y;
+    return_val.az = g.gyro.z;
+
     return return_val;
 }
 

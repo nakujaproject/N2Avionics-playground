@@ -3,12 +3,16 @@
 
 #include <BasicLinearAlgebra.h>
 #include "defs.h"
+#include "checkState.h"
+#include "readsensors.h"
 
 using namespace BLA;
 
 float q = 0.0001;
 
 float T = 0.1;
+int counter = 0;
+int state = 0;
 
 // The system dynamics
 BLA::Matrix<3, 3> A = {1.0, 0.1, 0.005,
@@ -74,19 +78,28 @@ struct FilteredValues kalmanUpdate(float altitude, float az)
 }
 struct LogData readData()
 {
+    struct SensorReadings readings;
+    struct FilteredValues filtered_values;
+    readings = get_readings();
+    filtered_values = kalmanUpdate(readings.altitude, readings.az);
+    state = checkState(filtered_values.displacement, filtered_values.velocity, counter, state);
+    counter = counter + 1;
+
     struct LogData ld;
-    ld.counter = 1;
-    ld.altitude = 1.2;
-    ld.ax = 1.2;
-    ld.ay = 1.2;
-    ld.az = 1.2;
-    ld.gx = 5.2;
-    ld.gy = 3.6;
-    ld.gz = 69.2;
-    ld.filtered_s = 1.2;
-    ld.filtered_v = 1.2;
-    ld.filtered_a = 1.2;
-    ld.states = 3;
+    ld.counter = counter;
+    ld.altitude = readings.altitude;
+    ld.ax = readings.ax;
+    ld.ay = readings.ay;
+    ld.az = readings.az;
+    ld.gx = readings.gx;
+    ld.gy = readings.gy;
+    ld.gz = readings.gz;
+    ld.filtered_s = filtered_values.displacement;
+    ld.filtered_a = filtered_values.acceleration;
+    ld.filtered_v = filtered_values.velocity;
+    ld.state = state;
+
+    // TODO: gps
     ld.longitude = 2.4;
     ld.latitude = 3.2;
 

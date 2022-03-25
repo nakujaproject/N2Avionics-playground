@@ -17,7 +17,7 @@ void serveDataUDP(LogData ld)
 
   // payload
 
-  Udp.printf("Counter : %f \n Altitude : %.3f \n ax : %.3f \n ay : %.3f \n az  : %.3f \n gx  : %.3f \n gy  : %.3f \n gz  : %.3f \n s : %.3f \n v : %.3f \n a : %.3f \n Current State  : %d \n Longitude  : %.3f \n Latitude  : %.3f \n", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.states, ld.longitude, ld.latitude);
+  Udp.printf("Counter : %d \n Altitude : %.3f \n ax : %.3f \n ay : %.3f \n az  : %.3f \n gx  : %.3f \n gy  : %.3f \n gz  : %.3f \n s : %.3f \n v : %.3f \n a : %.3f \n Current State  : %d \n Longitude  : %.3f \n Latitude  : %.3f \n", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.longitude, ld.latitude);
 
   if (!Udp.endPacket())
   {
@@ -31,7 +31,7 @@ void serveDataUDP(LogData ld)
 void serve_data()
 {
   LogData ld = readData();
-  DynamicJsonDocument doc(1024);
+  DynamicJsonDocument doc(256);
 
   doc["counter"] = ld.counter;
   doc["altitude"] = ld.altitude;
@@ -44,7 +44,7 @@ void serve_data()
   doc["filtered_s"] = ld.filtered_s;
   doc["filtered_v"] = ld.filtered_v;
   doc["filtered_a"] = ld.filtered_a;
-  doc["state"] = ld.states;
+  doc["state"] = ld.state;
   doc["longitude"] = ld.longitude;
   doc["latitude"] = ld.latitude;
 
@@ -55,7 +55,7 @@ void serve_data()
 }
 void handle_on_connect()
 {
-  server.send(200, "text/plain", "Hello client"); // put a function to read respective sensor inplace of sensor_data
+  server.send(200, "text/plain", "Hello client");
 }
 
 void handle_not_found()
@@ -68,8 +68,7 @@ void setupServer()
 
   // handle HTTP REQUESTS
   server.on("/", handle_on_connect);
-  // server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request)
-  //           { request->send_P(200, "text/plain", getSensorReadings().c_str()); });
+
   server.on("/data", serve_data);
 
   server.onNotFound(handle_not_found);

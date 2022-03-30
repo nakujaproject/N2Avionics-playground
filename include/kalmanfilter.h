@@ -76,6 +76,29 @@ struct FilteredValues kalmanUpdate(float altitude, float az)
 
     return return_val;
 }
+struct LogData dummyData()
+{
+    struct LogData ld;
+    ld.counter = 2;
+    ld.altitude = 10.5;
+    ld.ax = 2.56;
+    ld.ay = 2.65;
+    ld.az = 1.02;
+    ld.gx = 5.8;
+    ld.gy = 85.6;
+    ld.gz = 2.6;
+    ld.filtered_s = 3.56;
+    ld.filtered_a = 9.85;
+    ld.filtered_v = 1005.3;
+    ld.state = 5;
+
+    // TODO: gps
+    ld.longitude = 2.4;
+    ld.latitude = 3.2;
+
+    return ld;
+}
+
 struct LogData readData()
 {
     struct SensorReadings readings;

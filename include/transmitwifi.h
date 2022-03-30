@@ -1,5 +1,5 @@
-#ifndef TRANSMITT_H
-#define TRANSMITT_H
+#ifndef TRANSMITWIFI_H
+#define TRANSMITWIFI_H
 
 #include <WiFiUdp.h>
 #include "defs.h"
@@ -28,6 +28,7 @@ void serveDataUDP(LogData ld)
     Serial.println("SENT!!");
   }
 }
+
 void serve_data()
 {
   LogData ld = readData();

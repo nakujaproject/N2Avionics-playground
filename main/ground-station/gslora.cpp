@@ -9,7 +9,7 @@ const long bw = 125E3;
 
 void setUpLoraOnBoard()
 {
-    LoRa.setPins(5, 14, 2); // set CS, reset, IRQ pin
+    LoRa.setPins(5, 25, 2); // set CS, reset, IRQ pin
     Serial.println("Setting up LoRa Receiver");
 
     if (!LoRa.begin(freq))

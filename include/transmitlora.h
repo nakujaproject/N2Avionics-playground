@@ -10,7 +10,7 @@ const long bw = 125E3;   // bandwidth 125 kHz
 
 void setUpLoraOnBoard()
 {
-    LoRa.setPins(5, 14, 2); // set CS, reset, IRQ pin
+    LoRa.setPins(5, 25, 2); // set CS, reset, IRQ pin
     Serial.print("Setting up LoRa Sender...");
 
     while (!LoRa.begin(freq))
@@ -21,8 +21,7 @@ void setUpLoraOnBoard()
     Serial.println();
     Serial.println("Successfully set up LoRa");
 
-    
-    LoRa.setSpreadingFactor(SF);
+        LoRa.setSpreadingFactor(SF);
     // LoRa.setSignalBandwidth(bw);
     LoRa.setSyncWord(0xF3);
     Serial.print("Frequency ");

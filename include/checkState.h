@@ -1,6 +1,8 @@
 #ifndef CHECKSTATE_H
 #define CHECKSTATE_H
 
+#include "functions.h"
+
 //check state functions start
 int checkPrelaunch(float s)
 {
@@ -34,6 +36,7 @@ int checkApogee(float v)
   //detects that apogee has been achieved and ejection of parachute should take place
   if (v > -1 && v < 1)
   {
+    ejection();
     return 3;
   }
   return 2;

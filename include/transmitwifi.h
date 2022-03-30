@@ -46,7 +46,31 @@ void serve_data()
   doc["filtered_v"] = ld.filtered_v;
   doc["filtered_a"] = ld.filtered_a;
   doc["state"] = ld.state;
+  doc["longitude"] = ld.longitude;void serve_data()
+{
+  LogData ld = readData();
+  DynamicJsonDocument doc(256);
+
+  doc["counter"] = ld.counter;
+  doc["altitude"] = ld.altitude;
+  doc["ax"] = ld.ax;
+  doc["ay"] = ld.ay;
+  doc["az"] = ld.az;
+  doc["gx"] = ld.gx;
+  doc["gy"] = ld.gy;
+  doc["gz"] = ld.gz;
+  doc["filtered_s"] = ld.filtered_s;
+  doc["filtered_v"] = ld.filtered_v;
+  doc["filtered_a"] = ld.filtered_a;
+  doc["state"] = ld.state;
   doc["longitude"] = ld.longitude;
+  doc["latitude"] = ld.latitude;
+
+  String json;
+  serializeJson(doc, json);
+
+  server.send(200, "application/json", json);
+}
   doc["latitude"] = ld.latitude;
 
   String json;

@@ -74,9 +74,9 @@ struct SensorReadings get_readings()
     return_val.az = a.acceleration.z - 10.31;
 
     // TODO: calibrate gyro
-    return_val.ax = g.gyro.x;
-    return_val.ay = g.gyro.y;
-    return_val.az = g.gyro.z;
+    return_val.gx = g.gyro.x;
+    return_val.gy = g.gyro.y;
+    return_val.gz = g.gyro.z;
 
     return return_val;
 }

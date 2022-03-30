@@ -8,29 +8,41 @@
 #include "../include/kalmanfilter.h"
 #include "../include/checkState.h"
 #include "../include/logdata.h"
-#include "../include/transmitwifi.h"
 #include "../include/readsensors.h"
 #include "../include/transmitlora.h"
 #include "../include/defs.h"
 
-int sentCounter = 1, messageLostCounter = 0;
+int counter = 0;
+
+struct LogData readData()
+{
+    struct SensorReadings readings;
+    struct FilteredValues filtered_values;
+    struct LogData ld;
+    
+    readings = get_readings();
+    filtered_values = kalmanUpdate(readings.altitude, readings.az);
+    state = checkState(filtered_values.displacement, filtered_values.velocity, counter, state);
+    
+    ld = formart_data(readings, filtered_values);
+    ld.state = state;
+
+    return ld;
+}
 
 void setup()
 {
-    // init_components();
+    init_components();
     Serial.begin(BAUD_RATE);
+    pinMode(EJECTION_PIN, OUTPUT);
     setUpLoraOnBoard();
 }
 
 void loop()
 {
-    // struct LogData ld = readData();
-    struct LogData ld = dummyData();
-
-    char message[256];
-    sprintf(message, "{\"Counter\":%d,\"Altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"s\":%.3f,\"v\":%.3f,\"a\":%.3f,\"Current State\":%d,\"Longitude\":%.3f,\"Latitude\":%.3f\n}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.longitude, ld.latitude);
-
-    sendMessageLora(message, sentCounter);
-
-    sentCounter++;
+    struct LogData ld = readData();
+    ld.counter = counter;
+    sendMessageLora(ld);
+    counter++;
 }
+

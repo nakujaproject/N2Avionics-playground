@@ -19,6 +19,8 @@
 // value to detect lif off deviation
 #define LIFT_OFF_DEVIATION 2 // ideal: 50 cm
 
+#define EJECTION_PIN 18
+
 struct LogData
 {
     int counter;

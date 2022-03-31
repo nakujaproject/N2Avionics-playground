@@ -8,13 +8,13 @@
 // Timing delays
 #define SETUP_DELAY 1000
 
-#define SDCARD_CS_PIN 26
+#define SDCARD_CS_PIN 15
 
-#define SD_MOSI_PIN 14
+#define SD_MOSI_PIN 13
 
-#define SD_MISO_PIN 13
+#define SD_MISO_PIN 12
 
-#define SD_SCK_PIN 27
+#define SD_SCK_PIN 14
 
 #define CS_LORA_PIN 5
 
@@ -35,7 +35,7 @@
 // value to detect lif off deviation
 #define LIFT_OFF_DEVIATION 2 // ideal: 50 cm
 
-#define EJECTION_PIN 18
+#define EJECTION_PIN 4
 
 struct LogData
 {

@@ -3,6 +3,7 @@
 
 #include <SPI.h>
 #include <LoRa.h>
+#include "defs.h"
 
 const long freq = 868E6; // frequechy 868 MHz
 const int SF = 9;        // spread factor
@@ -10,7 +11,8 @@ const long bw = 125E3;   // bandwidth 125 kHz
 
 void setUpLoraOnBoard()
 {
-    LoRa.setPins(5, 25, 2); // set CS, reset, IRQ pin
+
+    LoRa.setPins(CS_LORA_PIN, RESET_LORA_PIN, IRQ_LORA_PIN); // set CS, reset, IRQ pin
     Serial.print("Setting up LoRa Sender...");
 
     while (!LoRa.begin(freq))

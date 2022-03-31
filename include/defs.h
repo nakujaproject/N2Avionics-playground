@@ -8,7 +8,23 @@
 // Timing delays
 #define SETUP_DELAY 1000
 
-#define SDCARD_CS 23
+#define SDCARD_CS_PIN 26
+
+#define SD_MOSI_PIN 14
+
+#define SD_MISO_PIN 13
+
+#define SD_SCK_PIN 27
+
+#define CS_LORA_PIN 5
+
+#define RESET_LORA_PIN 25
+
+#define IRQ_LORA_PIN 2
+
+#define GPS_TX_PIN 17
+
+#define GPS_RX_PIN 16
 
 #define SHORT_DELAY 10
 
@@ -48,6 +64,11 @@ struct SensorReadings
     float gx;
     float gy;
     float gz;
+};
+struct GPSReadings
+{
+    float latitude;
+    float longitude;
 };
 
 struct FilteredValues

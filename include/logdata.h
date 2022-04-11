@@ -4,7 +4,7 @@
 #include <mySD.h>
 #include <string>
 #include "defs.h"
-#define LOG_FILE "loggeddata.txt"
+#define LOG_FILE "flightData.txt"
 
 File dataFile;
 /*
@@ -17,26 +17,47 @@ CLK -> GPIO18
 MISO -> GPIO19
 GND -> GND
 */
-
-void startWriting()
+void readSD()
 {
-    dataFile = SD.open(LOG_FILE, FILE_WRITE);
+    dataFile = SD.open("flight.txt");
     if (dataFile)
     {
-        Serial.println("Start writing to test2");
-        dataFile.println("Index, Altitude, ax, ay, az, gx, gy, gz, filtered_s, filtered_v, filtered_a, states, longitude, latitude \r\n");
+        Serial.println("Content:");
+
+        // read from the file until there's nothing else in it:
+        while (dataFile.available())
+        {
+            Serial.write(dataFile.read());
+        }
+        // close the file:
         dataFile.close();
     }
     else
     {
-        Serial.println("File already exists");
+        
+        Serial.println("error opening test.txt");
+    }
+}
+void startWriting()
+{
+    dataFile = SD.open("flight.txt", FILE_WRITE);
+    if (dataFile)
+    {
+        Serial.println("Start writing to test2");
+        dataFile.println("Bange is Boss");
+        dataFile.close();
+    }
+    else
+    {
+
+        Serial.println("Error Opening file");
     }
 }
 
 // Append data to the SD card (DON'T MODIFY THIS FUNCTION)
 void appendFile(const char *message)
 {
-    dataFile = SD.open(LOG_FILE, FILE_WRITE);
+    dataFile = SD.open("flight.txt", FILE_WRITE);
     if (!dataFile)
     {
         Serial.println("Failed to open file for appending");

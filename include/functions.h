@@ -40,33 +40,34 @@ void done_ejection()
   digitalWrite(EJECTION_PIN, LOW);
 }
 
-struct LogData dummyData()
-{
-  struct LogData ld;
-  ld.counter = 2;
-  ld.altitude = 10.5;
-  ld.ax = 2.56;
-  ld.ay = 2.65;
-  ld.az = 1.02;
-  ld.gx = 5.8;
-  ld.gy = 85.6;
-  ld.gz = 2.6;
-  ld.filtered_s = 3.56;
-  ld.filtered_a = 9.85;
-  ld.filtered_v = 1005.3;
-  ld.state = 5;
+// struct LogData dummyData()
+// {
+//   struct LogData ld;
+//   ld.counter = 2;
+//   ld.altitude = 10.5;
+//   ld.ax = 2.56;
+//   ld.ay = 2.65;
+//   ld.az = 1.02;
+//   ld.gx = 5.8;
+//   ld.gy = 85.6;
+//   ld.gz = 2.6;
+//   ld.filtered_s = 3.56;
+//   ld.filtered_a = 9.85;
+//   ld.filtered_v = 1005.3;
+//   ld.state = 5;
 
-  // TODO: gps
-  ld.longitude = 2.4;
-  ld.latitude = 3.2;
+//   // TODO: gps
+//   ld.longitude = 2.4;
+//   ld.latitude = 3.2;
 
-  return ld;
-}
+//   return ld;
+// }
 
 struct LogData formart_data(SensorReadings readings, FilteredValues filtered_values, GPSReadings gpsReadings)
 {
   struct LogData ld;
-  ld.altitude = readings.altitude;
+
+  ld.sensorAltitude = readings.altitude;
   ld.ax = readings.ax;
   ld.ay = readings.ay;
   ld.az = readings.az;
@@ -78,6 +79,10 @@ struct LogData formart_data(SensorReadings readings, FilteredValues filtered_val
   ld.filtered_v = filtered_values.velocity;
   ld.longitude = gpsReadings.longitude;
   ld.latitude = gpsReadings.latitude;
+  ld.gpsAltitude = gpsReadings.altitude;
+  ld.gpsSatellites = gpsReadings.satellites;
+  ld.gpsSpeed = gpsReadings.speed;
+
   return ld;
 }
 #endif

@@ -4,15 +4,17 @@
 #include <SPI.h>
 #include <LoRa.h>
 #include "defs.h"
+#include "readsensors.h"
 
 const long freq = 868E6; // frequechy 868 MHz
 const int SF = 9;        // spread factor
 const long bw = 125E3;   // bandwidth 125 kHz
 
-void setUpLoraOnBoard()
+void setUpLoraOnBoard(SPIClass &spi)
 {
-
-    LoRa.setPins(CS_LORA_PIN, RESET_LORA_PIN, IRQ_LORA_PIN); // set CS, reset, IRQ pin
+    Serial.print("Setting up LoRa Sender...");
+    LoRa.setPins(LORA_CS_PIN, RESET_LORA_PIN, IRQ_LORA_PIN); // set CS, reset, IRQ pin
+    LoRa.setSPI(spi);
     Serial.print("Setting up LoRa Sender...");
 
     while (!LoRa.begin(freq))
@@ -37,12 +39,13 @@ void setUpLoraOnBoard()
 void sendMessageLora(LogData ld)
 {
     char message[256];
-    sprintf(message, "{\"Counter\":%d,\"Altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"s\":%.3f,\"v\":%.3f,\"a\":%.3f,\"Current State\":%d,\"Longitude\":%.3f,\"Latitude\":%.3f\n}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.longitude, ld.latitude);
-    Serial.printf("Message %d\n", ld.counter);
+    sprintf(message, "{\"counter\":%d,\"sensor altitude\":%.3f,\"gps altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"filtered s\":%.3f,\"filtered v\":%.3f,\"filtered a\":%.3f,\"state\":%d,\"longitude\":%.5f,\"latitude\":%.5f,\"gps v\":%.3f,\"satellites\":%d}", ld.counter, ld.sensorAltitude, ld.gpsAltitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.longitude, ld.latitude, ld.gpsSpeed, ld.gpsSatellites);
+
     Serial.println(message);
     // send packet
     LoRa.beginPacket();
     LoRa.print(message);
     LoRa.endPacket();
 }
+
 #endif

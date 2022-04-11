@@ -11,9 +11,17 @@
 #include "../include/readsensors.h"
 #include "../include/transmitlora.h"
 #include "../include/defs.h"
+#include <SPI.h>
 
+#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
+#define VSPI FSPI
+#endif
+
+// uninitalised pointers to SPI objects
+SPIClass *hspi = NULL;
 
 int counter = 0;
+struct LogData ld;
 
 struct LogData readData()
 {
@@ -21,14 +29,15 @@ struct LogData readData()
     struct FilteredValues filtered_values;
     struct GPSReadings gpsReadings;
     struct LogData ld;
-    
+
     readings = get_readings();
     gpsReadings = get_gps_readings();
 
-    filtered_values = kalmanUpdate(readings.altitude, readings.az);
+    filtered_values = kalmanUpdate(readings.altitude, readings.ay);
+
     state = checkState(filtered_values.displacement, filtered_values.velocity, counter, state);
-    
-    ld = formart_data(readings, filtered_values,gpsReadings);
+
+    ld = formart_data(readings, filtered_values, gpsReadings);
     ld.state = state;
 
     return ld;
@@ -36,17 +45,28 @@ struct LogData readData()
 
 void setup()
 {
-    init_components();
-    Serial.begin(BAUD_RATE);
-    pinMode(EJECTION_PIN, OUTPUT);
-    setUpLoraOnBoard();
+    // Initialize HSPI to be used by LORA according to https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/examples/SPI_Multiple_Buses/SPI_Multiple_Buses.ino
+    Serial.begin(115200);
+    hspi = new SPIClass(HSPI);
+    hspi->begin();
+
+    // // set up slave select pins as outputs as the Arduino API
+    pinMode(LORA_CS_PIN, OUTPUT); // HSPI SS for use by LORA
+    // pinMode(SDCARD_CS_PIN, OUTPUT); // VSPI SS for use by SDCARD
+
+    // init_components();
+    pinMode(33, OUTPUT);
+
+    SPIClass &spi = *hspi;
+    setUpLoraOnBoard(spi);
 }
 
 void loop()
 {
-    struct LogData ld = readData();
+    digitalWrite(33, !digitalRead(33));
+
+    ld = readData();
     ld.counter = counter;
     sendMessageLora(ld);
     counter++;
 }
-

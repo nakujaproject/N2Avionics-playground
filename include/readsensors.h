@@ -13,8 +13,9 @@
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 
-SoftwareSerial ss(GPS_RX_PIN, GPS_TX_PIN);
-TinyGPSPlus gps;
+TinyGPSPlus mygps;
+// using uart 2 for serial communication
+HardwareSerial neogps(2);
 
 Adafruit_BMP085 bmp;
 Adafruit_MPU6050 mpu;
@@ -22,9 +23,9 @@ Adafruit_MPU6050 mpu;
 // function to initialize sensors and the sd card module
 void init_components()
 {
-    Serial.begin(BAUD_RATE);
+
     Serial.println("BMP180 test!");
-    ss.begin(115200);
+
     if (!bmp.begin())
     {
         Serial.println("Could not find a valid BMP085 sensor, check wiring!");
@@ -45,45 +46,121 @@ void init_components()
         }
     }
     Serial.println("MPU6050 Found!");
-
-    // Serial.print("\nInitializing SD card...");
-    //  pinMode(SDCARD_CS_PIN, OUTPUT);
-
-    // if (!SD.begin(SDCARD_CS_PIN, SD_MOSI_PIN, SD_MISO_PIN, SD_SCK_PIN))
-    // {
-    //     Serial.println("initialization failed.");
-    //     while (1)
-    //     {
-    //         delay(SHORT_DELAY);
-    //     }
-    // }
-    // else
-    // {
-    //     Serial.println("Wiring is correct and a card is present.");
-    // }
-    // Serial.println("initialization done.");
-
-    // startWriting();
-
     mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     mpu.setGyroRange(MPU6050_RANGE_500_DEG);
     mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
-}
-struct GPSReadings get_gps_readings()
-{
-    struct GPSReadings gpsReadings;
-    while (ss.available() > 0)
+
+    Serial.print("\nInitializing SD card...");
+
+    if (!SD.begin(SDCARD_CS_PIN, SD_MOSI_PIN, SD_MISO_PIN, SD_SCK_PIN))
     {
-        gps.encode(ss.read());
-        if (gps.location.isUpdated())
+        Serial.println("initialization failed.");
+        while (1)
         {
-            gpsReadings.latitude = gps.location.lat();
-            gpsReadings.longitude = gps.location.lng();
+            delay(SHORT_DELAY);
+        }
+    }
+    else
+    {
+        Serial.println("Wiring is correct and a card is present.");
+    }
+    Serial.println("initialization done.");
+
+    
+
+}
+
+void printGPSSerial()
+{
+    bool newData = false;
+    while (neogps.available() > 0)
+    {
+        if (mygps.encode(neogps.read()))
+        {
+            newData = true;
+        }
+    }
+    if (newData == true)
+    {
+        if (mygps.location.isValid())
+        {
+            Serial.println(mygps.location.lat());
+            Serial.println(mygps.location.lng());
+            Serial.println(mygps.speed.kmph());
+            Serial.println(mygps.satellites.value());
+            Serial.println(mygps.altitude.meters());
         }
         else
         {
-            gpsReadings.latitude =0;
-            gpsReadings.longitude = 0;
+            Serial.println("Invalid location");
+        }
+        if (mygps.date.isValid())
+        {
+            Serial.print(mygps.date.month());
+            Serial.print(F("/"));
+            Serial.print(mygps.date.day());
+            Serial.print(F("/"));
+            Serial.print(mygps.date.year());
+        }
+        else
+        {
+
+            Serial.println("Invalid date");
+        }
+        if (mygps.time.isValid())
+        {
+            if (mygps.time.hour() < 10)
+                Serial.print(F("0"));
+            Serial.print(mygps.time.hour());
+            Serial.print(F(":"));
+            if (mygps.time.minute() < 10)
+                Serial.print(F("0"));
+            Serial.print(mygps.time.minute());
+            Serial.print(F(":"));
+            if (mygps.time.second() < 10)
+                Serial.print(F("0"));
+            Serial.print(mygps.time.second());
+            Serial.print(F("."));
+            if (mygps.time.centisecond() < 10)
+                Serial.print(F("0"));
+            Serial.print(mygps.time.centisecond());
+        }
+        else
+        {
+            Serial.print(F("invalid time"));
+        }
+    }
+    else
+    {
+        if (millis() > 5000 && mygps.charsProcessed() < 10)
+        {
+            Serial.println(F("No gps detected: check wiring."));
+            while (true)
+                ;
+        }
+    }
+}
+
+struct GPSReadings get_gps_readings()
+{
+    struct GPSReadings gpsReadings;
+    bool newData = false;
+    while (neogps.available() > 0)
+    {
+        if (mygps.encode(neogps.read()))
+        {
+            newData = true;
+        }
+    }
+    if (newData == true)
+    {
+        if (mygps.location.isValid())
+        {
+            gpsReadings.latitude = mygps.location.lat();
+            gpsReadings.longitude = mygps.location.lng();
+            gpsReadings.speed = mygps.speed.kmph();
+            gpsReadings.satellites = mygps.satellites.value();
+            gpsReadings.altitude = mygps.altitude.meters();
         }
     }
     return gpsReadings;

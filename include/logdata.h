@@ -56,9 +56,9 @@ void appendFile(const char *message)
 // Write the sensor readings on the SD card
 void logSDCard(LogData ld)
 {
-    String dataMessage;
-    dataMessage = String(ld.counter) + "," + String(ld.altitude) + "," + String(ld.ax) + "," + String(ld.ay) + "," + String(ld.az) + "," + String(ld.gx) + "," + String(ld.gy) + "," + String(ld.gz) + "," + String(ld.filtered_s) + "," + String(ld.filtered_v) + "," + String(ld.filtered_a) + "," + String(ld.state) + "," + String(ld.longitude) + "," + String(ld.latitude) + ",";
-    appendFile(dataMessage.c_str());
+    // String dataMessage;
+    // dataMessage = String(ld.counter) + "," + String(ld.altitude) + "," + String(ld.ax) + "," + String(ld.ay) + "," + String(ld.az) + "," + String(ld.gx) + "," + String(ld.gy) + "," + String(ld.gz) + "," + String(ld.filtered_s) + "," + String(ld.filtered_v) + "," + String(ld.filtered_a) + "," + String(ld.state) + "," + String(ld.longitude) + "," + String(ld.latitude) + ",";
+    // appendFile(dataMessage.c_str());
 }
 
 #endif

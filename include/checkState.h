@@ -2,8 +2,9 @@
 #define CHECKSTATE_H
 
 #include "functions.h"
+#include "defs.h"
 
-//check state functions start
+// check state functions start
 int checkPrelaunch(float s)
 {
   // determines that the rocket is in prelaunch and hasn't taken off
@@ -15,7 +16,7 @@ int checkPrelaunch(float s)
 }
 int checkInflight(float s, float t)
 {
-  //detects that the rocket is in flight
+  // detects that the rocket is in flight
   if (s > 5 && t > 0 && t < 3)
   {
     return 1;
@@ -24,7 +25,7 @@ int checkInflight(float s, float t)
 }
 int checkCoasting(float t, float v)
 {
-  //detects that burn out has occured and the rocket is coasting
+  // detects that burn out has occured and the rocket is coasting
   if (t > 3 && v > 1)
   {
     return 2;
@@ -33,7 +34,7 @@ int checkCoasting(float t, float v)
 }
 int checkApogee(float v)
 {
-  //detects that apogee has been achieved and ejection of parachute should take place
+  // detects that apogee has been achieved and ejection of parachute should take place
   if (v > -1 && v < 1)
   {
     ejection();
@@ -43,7 +44,7 @@ int checkApogee(float v)
 }
 int checkDescent(float v, float s)
 {
-  //detects descent of the rocket after parachute ejection
+  // detects descent of the rocket after parachute ejection
   if (v < -1 && s > 5)
   {
     return 4;
@@ -52,24 +53,25 @@ int checkDescent(float v, float s)
 }
 int checkGround(float v, float s)
 {
-  //detects landing of the rocket
+  // detects landing of the rocket
   if (v == 0 && s == 0)
   {
     return 5;
   }
   return 4;
 }
-//checks the current state of the rocket
+// checks the current state of the rocket
 int checkState(float s, float v, float t, int state)
 {
   int rval;
+  s = s - CURRENT_ALTITUDE;
   switch (state)
   {
   default:
     rval = checkPrelaunch(s);
     break;
   case 0:
-    //if the rocket is in state 0, it checks for lift off by monitoring state 1
+    // if the rocket is in state 0, it checks for lift off by monitoring state 1
     rval = checkInflight(s, t);
     break;
   case 1:
@@ -85,7 +87,7 @@ int checkState(float s, float v, float t, int state)
     rval = checkDescent(v, s);
     break;
   case 4:
-    //we check for thud by monitoring state 5
+    // we check for thud by monitoring state 5
     rval = checkGround(v, s);
     break;
   }

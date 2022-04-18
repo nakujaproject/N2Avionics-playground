@@ -63,11 +63,11 @@ void done_ejection()
 //   return ld;
 // }
 
-struct LogData formart_data(SensorReadings readings, FilteredValues filtered_values, GPSReadings gpsReadings)
+struct LogData formart_data(SensorReadings readings, FilteredValues filtered_values)
 {
   struct LogData ld;
 
-  ld.sensorAltitude = readings.altitude;
+  ld.altitude = readings.altitude;
   ld.ax = readings.ax;
   ld.ay = readings.ay;
   ld.az = readings.az;
@@ -77,11 +77,6 @@ struct LogData formart_data(SensorReadings readings, FilteredValues filtered_val
   ld.filtered_s = filtered_values.displacement;
   ld.filtered_a = filtered_values.acceleration;
   ld.filtered_v = filtered_values.velocity;
-  ld.longitude = gpsReadings.longitude;
-  ld.latitude = gpsReadings.latitude;
-  ld.gpsAltitude = gpsReadings.altitude;
-  ld.gpsSatellites = gpsReadings.satellites;
-  ld.gpsSpeed = gpsReadings.speed;
 
   return ld;
 }

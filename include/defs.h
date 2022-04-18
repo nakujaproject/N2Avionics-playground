@@ -2,20 +2,18 @@
 #define DEFINITIONS_H
 
 #define SEA_LEVEL_PRESSURE_HPA 1024
-#define CURRENT_ALTITUDE 1479
 #define SEA_LEVEL_PRESSURE 102400
 
 // Timing delays
 #define SETUP_DELAY 1000
 
-
-//define sd card VSPI
+// define sd card VSPI
 #define SDCARD_CS_PIN 5
 #define SD_MOSI_PIN 23
 #define SD_MISO_PIN 19
 #define SD_SCK_PIN 18
 
-//define lora HSPI
+// define lora HSPI
 #define LORA_CS_PIN 15
 #define LORA_MOSI_PIN 13
 #define LORA_MISO_PIN 12
@@ -37,13 +35,13 @@
 
 #define EJECTION_PIN 4
 
+const char *telemetryLogFile = "telemetry.txt";
+const char *gpsLogFile = "gps.txt";
+
 struct LogData
 {
     int counter;
-    float sensorAltitude;
-    float gpsAltitude;
-    float gpsSpeed;
-    int gpsSatellites;
+    float altitude;
     float ax;
     float ay;
     float az;
@@ -54,8 +52,6 @@ struct LogData
     float filtered_v;
     float filtered_a;
     int state;
-    float longitude;
-    float latitude;
 };
 
 struct SensorReadings

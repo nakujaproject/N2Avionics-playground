@@ -4,7 +4,6 @@
 #include <mySD.h>
 #include <string>
 #include "defs.h"
-#define LOG_FILE "flightData.txt"
 
 File dataFile;
 /*
@@ -34,30 +33,31 @@ void readSD()
     }
     else
     {
-        
+
         Serial.println("error opening test.txt");
     }
 }
-void startWriting()
+void startWriting(const char *fileName)
 {
-    dataFile = SD.open("flight.txt", FILE_WRITE);
+    dataFile = SD.open(fileName, FILE_WRITE);
     if (dataFile)
     {
-        Serial.println("Start writing to test2");
-        dataFile.println("Bange is Boss");
+        Serial.print("Start writing to ");
+        Serial.println(fileName);
         dataFile.close();
     }
     else
     {
 
-        Serial.println("Error Opening file");
+        Serial.println("Error Opening ");
+        Serial.println(fileName);
     }
 }
 
 // Append data to the SD card (DON'T MODIFY THIS FUNCTION)
-void appendFile(const char *message)
+void appendToFile(const char *message, const char *fileName)
 {
-    dataFile = SD.open("flight.txt", FILE_WRITE);
+    dataFile = SD.open(fileName, FILE_WRITE);
     if (!dataFile)
     {
         Serial.println("Failed to open file for appending");
@@ -72,14 +72,6 @@ void appendFile(const char *message)
         Serial.println("Append failed");
     }
     dataFile.close();
-}
-
-// Write the sensor readings on the SD card
-void logSDCard(LogData ld)
-{
-    // String dataMessage;
-    // dataMessage = String(ld.counter) + "," + String(ld.altitude) + "," + String(ld.ax) + "," + String(ld.ay) + "," + String(ld.az) + "," + String(ld.gx) + "," + String(ld.gy) + "," + String(ld.gz) + "," + String(ld.filtered_s) + "," + String(ld.filtered_v) + "," + String(ld.filtered_a) + "," + String(ld.state) + "," + String(ld.longitude) + "," + String(ld.latitude) + ",";
-    // appendFile(dataMessage.c_str());
 }
 
 #endif

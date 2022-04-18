@@ -48,13 +48,13 @@ BLA::Matrix<3, 1> x_hat = {1500.0,
 BLA::Matrix<2, 1> Y = {0.0,
                        0.0};
 
-struct FilteredValues kalmanUpdate(float altitude, float az)
+struct FilteredValues kalmanUpdate(float altitude, float acceleration)
 {
     struct FilteredValues return_val;
     // Measurement matrix
 
     BLA::Matrix<2, 1> Z = {altitude,
-                           az};
+                           acceleration};
     // Predicted state estimate
     BLA::Matrix<3, 1> x_hat_minus = A * x_hat;
     // Predicted estimate covariance

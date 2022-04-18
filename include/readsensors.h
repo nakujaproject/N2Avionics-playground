@@ -97,34 +97,34 @@ String ConvertLng()
 void init_components()
 {
 
-    //GPS Software Serial
+    // GPS Software Serial
     GPSModule.begin(9600);
 
-    // Serial.println("BMP180 test!");
+    Serial.println("BMP180 test!");
 
-    // if (!bmp.begin())
-    // {
-    //     Serial.println("Could not find a valid BMP085 sensor, check wiring!");
-    //     while (1)
-    //     {
-    //         delay(SHORT_DELAY);
-    //     }
-    // }
-    // Serial.println("BMP180 Found!");
+    if (!bmp.begin())
+    {
+        Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+        while (1)
+        {
+            delay(SHORT_DELAY);
+        }
+    }
+    Serial.println("BMP180 Found!");
 
-    // Serial.println("MPU6050 test!");
-    // if (!mpu.begin())
-    // {
-    //     Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
-    //     while (1)
-    //     {
-    //         delay(SHORT_DELAY);
-    //     }
-    // }
-    // Serial.println("MPU6050 Found!");
-    // mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-    // mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-    // mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
+    Serial.println("MPU6050 test!");
+    if (!mpu.begin())
+    {
+        Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
+        while (1)
+        {
+            delay(SHORT_DELAY);
+        }
+    }
+    Serial.println("MPU6050 Found!");
+    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+    mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
 
     Serial.print("\nInitializing SD card...");
 
@@ -141,8 +141,10 @@ void init_components()
         Serial.println("Wiring is correct and a card is present.");
     }
     Serial.println("initialization done.");
+    
+    startWriting(telemetryLogFile);
+    startWriting(gpsLogFile);
 }
-
 
 struct GPSReadings get_gps_readings()
 {
@@ -202,7 +204,6 @@ struct SensorReadings get_readings()
     return_val.ay = a.acceleration.y - 0.3;
     return_val.az = a.acceleration.z - 10.31;
 
-    // TODO: calibrate gyro
     return_val.gx = g.gyro.x;
     return_val.gy = g.gyro.y;
     return_val.gz = g.gyro.z;

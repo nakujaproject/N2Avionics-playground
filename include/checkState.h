@@ -4,6 +4,8 @@
 #include "functions.h"
 #include "defs.h"
 
+static float base_altitude;
+
 // check state functions start
 int checkPrelaunch(float s)
 {
@@ -54,6 +56,7 @@ int checkDescent(float v, float s)
 int checkGround(float v, float s)
 {
   // detects landing of the rocket
+  // TODO: please review  s might be greater than 0
   if (v == 0 && s == 0)
   {
     return 5;
@@ -64,7 +67,7 @@ int checkGround(float v, float s)
 int checkState(float s, float v, float t, int state)
 {
   int rval;
-  s = s - CURRENT_ALTITUDE;
+  s = s - base_altitude;
   switch (state)
   {
   default:

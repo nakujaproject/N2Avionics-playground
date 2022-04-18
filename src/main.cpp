@@ -70,6 +70,6 @@ void loop()
 
     // ld = readData();
     //  ld.counter = counter;
-    //  sendMessageLora(ld);
+    //  sendTelemetryLora(ld);
     //  counter++;
 }

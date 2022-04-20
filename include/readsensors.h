@@ -98,52 +98,52 @@ void init_components()
 {
 
     // GPS Software Serial
-    GPSModule.begin(9600);
+    // GPSModule.begin(9600);
 
-    Serial.println("BMP180 test!");
+    // Serial.println("BMP180 test!");
 
-    if (!bmp.begin())
-    {
-        Serial.println("Could not find a valid BMP085 sensor, check wiring!");
-        while (1)
-        {
-            delay(SHORT_DELAY);
-        }
-    }
-    Serial.println("BMP180 Found!");
+    // if (!bmp.begin())
+    // {
+    //     Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+    //     while (1)
+    //     {
+    //         delay(SHORT_DELAY);
+    //     }
+    // }
+    // Serial.println("BMP180 Found!");
 
-    Serial.println("MPU6050 test!");
-    if (!mpu.begin())
-    {
-        Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
-        while (1)
-        {
-            delay(SHORT_DELAY);
-        }
-    }
-    Serial.println("MPU6050 Found!");
-    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-    mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
+    // Serial.println("MPU6050 test!");
+    // if (!mpu.begin())
+    // {
+    //     Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
+    //     while (1)
+    //     {
+    //         delay(SHORT_DELAY);
+    //     }
+    // }
+    // Serial.println("MPU6050 Found!");
+    // mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+    // mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+    // mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
 
-    Serial.print("\nInitializing SD card...");
+    // Serial.print("\nInitializing SD card...");
 
-    if (!SD.begin(SDCARD_CS_PIN, SD_MOSI_PIN, SD_MISO_PIN, SD_SCK_PIN))
-    {
-        Serial.println("initialization failed.");
-        while (1)
-        {
-            delay(SHORT_DELAY);
-        }
-    }
-    else
-    {
-        Serial.println("Wiring is correct and a card is present.");
-    }
-    Serial.println("initialization done.");
+    // if (!SD.begin(SDCARD_CS_PIN, SD_MOSI_PIN, SD_MISO_PIN, SD_SCK_PIN))
+    // {
+    //     Serial.println("initialization failed.");
+    //     while (1)
+    //     {
+    //         delay(SHORT_DELAY);
+    //     }
+    // }
+    // else
+    // {
+    //     Serial.println("Wiring is correct and a card is present.");
+    // }
+    // Serial.println("initialization done.");
     
-    startWriting(telemetryLogFile);
-    startWriting(gpsLogFile);
+    // startWriting(telemetryLogFile);
+    // startWriting(gpsLogFile);
 }
 
 struct GPSReadings get_gps_readings()
@@ -176,12 +176,8 @@ struct GPSReadings get_gps_readings()
         //    nmea[4] = ConvertLng();
         float lati = ConvertLat().toFloat();
         float lngi = ConvertLng().toFloat();
-        Serial.print(labels[2]);
-        Serial.print(lati, 8);
-        Serial.println("");
-        Serial.print(labels[4]);
-        Serial.print(lngi, 8);
-        Serial.println("");
+        gpsReadings.latitude=lati;
+        gpsReadings.longitude=lngi;
     }
     else
     {

@@ -25,8 +25,8 @@ void setUpLoraOnBoard(SPIClass &spi)
     Serial.println();
     Serial.println("Successfully set up LoRa");
 
-    LoRa.setSpreadingFactor(SF);
-    // LoRa.setSignalBandwidth(bw);
+    LoRa.setSpreadingFactor(7);
+    LoRa.setSignalBandwidth(bw);
     LoRa.setSyncWord(0xF3);
     Serial.print("Frequency ");
     Serial.print(freq);
@@ -36,44 +36,27 @@ void setUpLoraOnBoard(SPIClass &spi)
     Serial.println(SF);
 }
 
-void sendTelemetryLora(LogData ld)
-{
-
-    char *message = printTelemetryMessage(ld);
-    Serial.println(message);
-
-    // send packet
-    LoRa.beginPacket();
-    LoRa.print(message);
-    LoRa.endPacket();
-}
-
-void sendGPSLora(GPSReadings gps)
-{
-
-    char *message = printGPSMessage(gps);
-
-    Serial.println(message);
-
-    // send packet
-    LoRa.beginPacket();
-    LoRa.print(message);
-    LoRa.endPacket();
-}
-
-char *printGPSMessage(GPSReadings gps)
-{
-    // TODO: optimize size
-    char message[256];
-    sprintf(message, "{\"gps altitude\":%.3f,\"longitude\":%.5f,\"latitude\":%.5f,\"gps speed\":%.3f,\"satellites\":%d}", gps.altitude, gps.longitude, gps.latitude, gps.speed, gps.satellites);
-    return message;
-}
 char *printTelemetryMessage(LogData ld)
 {
     // TODO: optimize size
     char message[256];
-    sprintf(message, "{\"counter\":%d,\"sensor altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"filtered s\":%.3f,\"filtered v\":%.3f,\"filtered a\":%.3f,\"state\":%d}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state);
-    return message;
+    sprintf(message, "{\"counter\":%d,\"sensor altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"filtered s\":%.3f,\"filtered v\":%.3f,\"filtered a\":%.3f,\"state\":%d,\"gps altitude\":%.3f,\"longitude\":%.8f,\"latitude\":%.8f}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.gpsAltitude, ld.longitude, ld.latitude);
+    return (char *)message;
+}
+
+void sendTelemetryLora(LogData ld)
+{
+
+    char message[256];
+    sprintf(message, "{\"counter\":%d,\"sensor altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"filtered s\":%.3f,\"filtered v\":%.3f,\"filtered a\":%.3f,\"state\":%d,\"gps altitude\":%.3f,\"longitude\":%.8f,\"latitude\":%.8f}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.gpsAltitude, ld.longitude, ld.latitude);
+
+    Serial.println(message);
+
+    // send packet
+    LoRa.beginPacket();
+    LoRa.print(message);
+    LoRa.endPacket();
+    Serial.println("Done");
 }
 
 #endif

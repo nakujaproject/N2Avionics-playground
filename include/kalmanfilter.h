@@ -11,7 +11,6 @@ using namespace BLA;
 float q = 0.0001;
 
 float T = 0.1;
-int state = 0;
 
 // The system dynamics
 BLA::Matrix<3, 3> A = {1.0, 0.1, 0.005,

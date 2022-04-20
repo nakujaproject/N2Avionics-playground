@@ -52,6 +52,9 @@ struct LogData
     float filtered_v;
     float filtered_a;
     int state;
+    float latitude;
+    float longitude;
+    float gpsAltitude;
 };
 
 struct SensorReadings

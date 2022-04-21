@@ -16,9 +16,9 @@ CLK -> GPIO18
 MISO -> GPIO19
 GND -> GND
 */
-void readSD()
+void readSD(const char *fileName)
 {
-    dataFile = SD.open("flight.txt");
+    dataFile = SD.open(fileName);
     if (dataFile)
     {
         Serial.println("Content:");

@@ -32,7 +32,6 @@ static int state = 0;
 // uninitalised pointers to SPI objects
 SPIClass *hspi = NULL;
 
-
 struct LogData readData()
 {
     struct SensorReadings readings;
@@ -100,12 +99,11 @@ void SDLogTelemetryTask(void *parameter)
     struct LogData ld;
     for (;;)
     {
-
         if (xQueueReceive(telemetry_queue, (void *)&ld, 0) == pdTRUE)
         {
-            const char *message = printTelemetryMessage(ld);
-
+            char *message = printTelemetryMessage(ld);
             appendToFile(message, telemetryLogFile);
+            free(message);
         }
 
         // yield to another task
@@ -142,7 +140,7 @@ void setup()
 
     init_components();
 
-    //get the base_altitude
+    // get the base_altitude
     SensorReadings readings = get_readings();
     FilteredValues filtered_values = kalmanUpdate(readings.altitude, readings.ay);
     base_altitude = filtered_values.displacement;

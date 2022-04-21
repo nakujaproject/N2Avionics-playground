@@ -24,7 +24,7 @@ void setUpLoraOnBoard(SPIClass &spi)
 
     Serial.println();
     Serial.println("Successfully set up LoRa");
- 
+
     LoRa.setSpreadingFactor(7);
     LoRa.setSignalBandwidth(bw);
     LoRa.setSyncWord(0xF3);
@@ -38,18 +38,20 @@ void setUpLoraOnBoard(SPIClass &spi)
 
 char *printTelemetryMessage(LogData ld)
 {
-    // TODO: optimize size
-    char message[256];
+    //optimized size
+    char *message = (char *)malloc(256);
+    if (!message)
+        return NULL;
+
     sprintf(message, "{\"counter\":%d,\"sensor altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"filtered s\":%.3f,\"filtered v\":%.3f,\"filtered a\":%.3f,\"state\":%d,\"gps altitude\":%.3f,\"longitude\":%.8f,\"latitude\":%.8f}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.gpsAltitude, ld.longitude, ld.latitude);
-    return (char *)message;
+
+    return message;
 }
 
 void sendTelemetryLora(LogData ld)
 {
 
-    char message[256];
-    sprintf(message, "{\"counter\":%d,\"sensor altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"filtered s\":%.3f,\"filtered v\":%.3f,\"filtered a\":%.3f,\"state\":%d,\"gps altitude\":%.3f,\"longitude\":%.8f,\"latitude\":%.8f}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.gpsAltitude, ld.longitude, ld.latitude);
-
+    char *message = printTelemetryMessage(ld);
     Serial.println(message);
 
     // send packet

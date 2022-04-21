@@ -57,7 +57,7 @@ int checkGround(float v, float s)
 {
   // detects landing of the rocket
   // TODO: please review  s might be greater than 0
-  if (v == 0 && s == 0)
+  if (v == 0 || s == 0)
   {
     return 5;
   }

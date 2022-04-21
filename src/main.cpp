@@ -32,19 +32,7 @@ static int state = 0;
 // uninitalised pointers to SPI objects
 SPIClass *hspi = NULL;
 
-struct LogData dummyData()
-{
-    struct LogData ld;
 
-    if (state == 5)
-    {
-        ld.latitude = 52.3;
-        ld.longitude = 582.5;
-    }
-    ld.altitude = 3;
-
-    return ld;
-}
 struct LogData readData()
 {
     struct SensorReadings readings;
@@ -79,7 +67,7 @@ void LoRaTelemetryTask(void *parameter)
     for (;;)
     {
 
-        // Ticks to wait has been optimised
+        // Ticks to wait has been optimized
         if (xQueueReceive(telemetry_queue, (void *)&ld, 10) == pdTRUE)
         {
             sendTelemetryLora(ld);
@@ -96,8 +84,7 @@ void ReadTelemetryTask(void *parameter)
     for (;;)
     {
 
-        // ld = readData();
-        ld = dummyData();
+        ld = readData();
         if (xQueueSend(telemetry_queue, (void *)&ld, 0) != pdTRUE)
         {
             Serial.println("Queue Full!");
@@ -118,7 +105,7 @@ void SDLogTelemetryTask(void *parameter)
         {
             const char *message = printTelemetryMessage(ld);
 
-            // appendToFile(message, telemetryLogFile);
+            appendToFile(message, telemetryLogFile);
         }
 
         // yield to another task
@@ -155,10 +142,10 @@ void setup()
 
     init_components();
 
-    // get the base_altitude
-    // SensorReadings readings = get_readings();
-    // FilteredValues filtered_values = kalmanUpdate(readings.altitude, readings.ay);
-    // base_altitude = filtered_values.displacement;
+    //get the base_altitude
+    SensorReadings readings = get_readings();
+    FilteredValues filtered_values = kalmanUpdate(readings.altitude, readings.ay);
+    base_altitude = filtered_values.displacement;
 
     telemetry_queue = xQueueCreate(telemetry_queue_length, sizeof(LogData));
 
@@ -172,7 +159,6 @@ void setup()
     // xTaskCreatePinnedToCore(FlightControlTask, "FlightControlTask", 10000, NULL, 1, &FlightControlTaskHandle, tskNO_AFFINITY);
 
     // Delete "setup and loop" task
-
     vTaskDelete(NULL);
 }
 

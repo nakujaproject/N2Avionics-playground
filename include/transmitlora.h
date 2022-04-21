@@ -24,7 +24,7 @@ void setUpLoraOnBoard(SPIClass &spi)
 
     Serial.println();
     Serial.println("Successfully set up LoRa");
-
+ 
     LoRa.setSpreadingFactor(7);
     LoRa.setSignalBandwidth(bw);
     LoRa.setSyncWord(0xF3);

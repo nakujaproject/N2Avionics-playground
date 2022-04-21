@@ -54,11 +54,13 @@ void sendTelemetryLora(LogData ld)
     char *message = printTelemetryMessage(ld);
     Serial.println(message);
 
+
     // send packet
     LoRa.beginPacket();
     LoRa.print(message);
     LoRa.endPacket();
     Serial.println("Done");
+    free(message);
 }
 
 #endif

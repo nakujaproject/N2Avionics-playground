@@ -32,6 +32,7 @@ void createAccessPoint()
 
 void ejection()
 {
+  //TODO: set timer here
   digitalWrite(EJECTION_PIN, HIGH);
 }
 

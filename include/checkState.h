@@ -4,94 +4,96 @@
 #include "functions.h"
 #include "defs.h"
 
-static float base_altitude;
-
-// check state functions start
-int checkPrelaunch(float s)
+// This checks that we have starting ascent
+int checkInflight(float altitude)
 {
-  // determines that the rocket is in prelaunch and hasn't taken off
-  if (s == 0)
-  {
-    return 0;
-  }
-  return 0;
-}
-int checkInflight(float s, float t)
-{
-  // detects that the rocket is in flight
-  if (s > 5 && t > 0 && t < 3)
+  float displacement = altitude - BASE_ALTITUDE;
+  // If we have a positive 20 metres displacement upwards
+  if (displacement > 20)
   {
     return 1;
   }
-  return 0;
+  else
+  {
+    return 0;
+  }
 }
-int checkCoasting(float t, float v)
+
+// This checks that we have reached maximum altitude
+int checkApogee(float velocity, float altitude)
 {
-  // detects that burn out has occured and the rocket is coasting
-  if (t > 3 && v > 1)
+  // At apogee velocity is zero
+  if (velocity < 0)
+  {
+    // Fire ejection charge
+    ejection();
+    MAX_ALTITUDE = altitude;
+    return 2;
+  }
+  else
+  {
+    return 1;
+  }
+}
+
+// This checks that we are descending from maximum altitude
+int checkDescent(float altitude)
+{
+  float displacement = altitude - MAX_ALTITUDE;
+  // If we have moved down past 20 metres
+  if (displacement < 20)
+  {
+    return 3;
+  }
+  else
   {
     return 2;
   }
-  return 1;
 }
-int checkApogee(float v)
+
+// This checks that we have reached the ground
+// detects landing of the rocket
+int checkGround(float altitude)
 {
-  // detects that apogee has been achieved and ejection of parachute should take place
-  if (v > -1 && v < 1)
-  {
-    ejection();
-    return 3;
-  }
-  return 2;
-}
-int checkDescent(float v, float s)
-{
-  // detects descent of the rocket after parachute ejection
-  if (v < -1 && s > 5)
+  float displacement = altitude - BASE_ALTITUDE;
+  if ((displacement > 20) || (displacement < 20))
   {
     return 4;
   }
-  return 3;
-}
-int checkGround(float v, float s)
-{
-  // detects landing of the rocket
-  // TODO: please review  s might be greater than 0
-  if (v == 0 || s == 0)
+  else
   {
-    return 5;
+    return 3;
   }
-  return 4;
 }
+
 // checks the current state of the rocket
-int checkState(float s, float v, float t, int state)
+int checkState(float altitude, float velocity, int state)
 {
   int rval;
-  s = s - base_altitude;
   switch (state)
   {
-  default:
-    rval = checkPrelaunch(s);
-    break;
   case 0:
-    // if the rocket is in state 0, it checks for lift off by monitoring state 1
-    rval = checkInflight(s, t);
+    // The rocket is in state 0 and we are looking out for state 1
+    // We check if we have started flying
+    rval = checkInflight(altitude);
     break;
   case 1:
-    // while in state 1 we check for burnout by monitoring state 2
-    rval = checkCoasting(t, v);
+    // We check if we have reached apogee
+    // The rocket is in state 1 and we are looking out for state 2
+    rval = checkApogee(velocity, altitude);
     break;
   case 2:
-    // we check for apogee for parachute deployment by monitoring state 3
-    rval = checkApogee(v);
+    // We check if we are descending
+    // The rocket is in state 2 and we are looking out for state 3
+    rval = checkDescent(v);
     break;
   case 3:
-    // we check for descent by monitoring state 4
-    rval = checkDescent(v, s);
-    break;
-  case 4:
-    // we check for thud by monitoring state 5
+    // We check if we have reached the ground
+    // The rocket is in state 3 and we are looking out for state 4
     rval = checkGround(v, s);
+    break;
+  default:
+    rval = checkInflight(altitude);
     break;
   }
   return rval;

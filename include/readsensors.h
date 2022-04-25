@@ -12,6 +12,8 @@
 #include "defs.h"
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
+#include <SPI.h>
+#include <LoRa.h>
 
 
 // using uart 2 for serial communication
@@ -74,9 +76,9 @@ String ConvertLng()
         if (nmea[4].substring(i, i + 1) == ".")
         {
             lngfirst = nmea[4].substring(0, i - 2);
-            // Serial.println(lngfirst);
+            // debugln(lngfirst);
             lngsecond = nmea[4].substring(i - 2).toFloat();
-            // Serial.println(lngsecond);
+            // debugln(lngsecond);
         }
     }
     lngsecond = lngsecond / 60;
@@ -92,44 +94,18 @@ String ConvertLng()
     return lngfirst;
 }
 
-// function to initialize sensors and the sd card module
-void init_components()
+// function to initialize bmp, mpu and the sd card module
+void init_components(SPIClass &spi)
 {
 
-    //GPS Software Serial
+    debugln("GPS INITIALIZATION");
     GPSModule.begin(9600);
+    debugln("GPS FOUND");
 
-    Serial.println("BMP180 test!");
-
+    debugln("BMP180 INITIALIZATION");
     if (!bmp.begin())
     {
-        Serial.println("Could not find a valid BMP085 sensor, check wiring!");
-        while (1)
-        {
-            delay(SHORT_DELAY);
-        }
-    }
-    Serial.println("BMP180 Found!");
-
-    Serial.println("MPU6050 test!");
-    if (!mpu.begin())
-    {
-        Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
-        while (1)
-        {
-            delay(SHORT_DELAY);
-        }
-    }
-    Serial.println("MPU6050 Found!");
-    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-    mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
-
-    Serial.print("\nInitializing SD card...");
-
-    if (!SD.begin(SDCARD_CS_PIN, SD_MOSI_PIN, SD_MISO_PIN, SD_SCK_PIN))
-    {
-        Serial.println("initialization failed.");
+        debugln("Could not find a valid BMP085 sensor, check wiring!");
         while (1)
         {
             delay(SHORT_DELAY);
@@ -137,14 +113,74 @@ void init_components()
     }
     else
     {
-        Serial.println("Wiring is correct and a card is present.");
+        ;
     }
-    Serial.println("initialization done.");
+    
+    debugln("BMP180 FOUND");
+
+    debugln("MPU6050 test!");
+    if (!mpu.begin())
+    {
+        debugln("Could not find a valid MPU6050 sensor, check wiring!");
+        while (1)
+        {
+            delay(SHORT_DELAY);
+        }
+    }
+    else
+    {
+        ;
+    }
+    
+    debugln("MPU6050 FOUND");
+    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+    mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
+
+    debugln("SD_CARD INITIALIZATION");
+    if (!SD.begin(SDCARD_CS_PIN, SD_MOSI_PIN, SD_MISO_PIN, SD_SCK_PIN))
+    {
+        debugln("Could not find a valid SD Card, check wiring!");
+        while (1)
+        {
+            delay(SHORT_DELAY);
+        }
+    }
+    else
+    {
+        ;
+    }
+    debugln("SD CARD FOUND");
     
     startWriting(telemetryLogFile);
-    startWriting(gpsLogFile);
+
+    debugln("LORA INITIALIZATION");
+    debug("Setting up LoRa Sender...");
+    LoRa.setPins(LORA_CS_PIN, RESET_LORA_PIN, IRQ_LORA_PIN); // set CS, reset, IRQ pin
+    LoRa.setSPI(spi);
+
+    while (!LoRa.begin(LORA_FREQ))
+    {
+        debug(".");
+    }
+
+    debugln();
+    debugln("Successfully set up LoRa");
+
+    LoRa.setSpreadingFactor(LORA_SF);
+    LoRa.setSignalBandwidth(LORA_BW);
+    LoRa.setSyncWord(LORA_SYNC_WORD);
+    debug("Frequency :");
+    debug(freq);
+    debug("Bandwidth :");
+    debug(bw);
+    debug("SF :");
+    debugln(SF);
+    debugln("LORA FOUND");
+    
 }
 
+// Get the gps readings from the gps sensor
 struct GPSReadings get_gps_readings()
 {
     struct GPSReadings gpsReadings;
@@ -171,8 +207,6 @@ struct GPSReadings get_gps_readings()
             }
         }
         updates++;
-        //    nmea[2] = ConvertLat();
-        //    nmea[4] = ConvertLng();
         float lati = ConvertLat().toFloat();
         float lngi = ConvertLng().toFloat();
         gpsReadings.latitude=lati;
@@ -185,15 +219,16 @@ struct GPSReadings get_gps_readings()
     return gpsReadings;
 }
 
+// Get the mpu readings
 struct SensorReadings get_readings()
 {
     struct SensorReadings return_val;
     sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp);
     return_val.altitude = bmp.readAltitude(SEA_LEVEL_PRESSURE);
-    return_val.ax = a.acceleration.x + 0.35;
-    return_val.ay = a.acceleration.y - 0.3;
-    return_val.az = a.acceleration.z - 10.31;
+    return_val.ax = a.acceleration.x;
+    return_val.ay = a.acceleration.y;
+    return_val.az = a.acceleration.z;
 
     return_val.gx = g.gyro.x;
     return_val.gy = g.gyro.y;

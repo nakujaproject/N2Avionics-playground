@@ -3,7 +3,6 @@
  * Check brownout issues to prevent ESP32 from re-booting unexpectedly
  */
 #include "../include/functions.h"
-#include "../include/functions.h"
 #include "../include/kalmanfilter.h"
 #include "../include/checkState.h"
 #include "../include/logdata.h"
@@ -11,6 +10,15 @@
 #include "../include/transmitlora.h"
 #include "../include/defs.h"
 #include <SPI.h>
+
+#define DEBUG 1
+#if DEBUG ==1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#else
+#define debug(x)
+#define debugln(x)
+#endif
 
 static const BaseType_t pro_cpu = 0;
 
@@ -148,7 +156,7 @@ void ReadTelemetryTask(void *parameter)
         ld = readData();
         if (xQueueSend(telemetry_queue, (void *)&ld, 0) != pdTRUE)
         {
-            Serial.println("Queue Full!");
+            debug("Queue Full!");
         }
 
         // yield to another task
@@ -163,8 +171,7 @@ void SDLogTelemetryTask(void *parameter)
     {
         if (xQueueReceive(telemetry_queue, (void *)&ld, 0) == pdTRUE)
         {
-            char *message = printTelemetryMessage(ld);
-            appendToFile(message, telemetryLogFile);
+            appendToFile(ld);
             free(message);
         }
 
@@ -198,14 +205,15 @@ void setup()
     hspi->begin();
 
     SPIClass &spi = *hspi;
-    setUpLoraOnBoard(spi);
 
-    init_components();
+    init_components(spi);
 
     // get the base_altitude
     SensorReadings readings = get_readings();
     FilteredValues filtered_values = kalmanUpdate(readings.altitude, readings.ay);
     base_altitude = filtered_values.displacement;
+
+    delay(SETUP_DELAY)
 
     telemetry_queue = xQueueCreate(telemetry_queue_length, sizeof(LogData));
 
@@ -224,5 +232,3 @@ void setup()
     // Delete "setup and loop" task
     vTaskDelete(NULL);
 }
-
-void loop() {}

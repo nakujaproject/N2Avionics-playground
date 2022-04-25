@@ -6,70 +6,52 @@
 #include "defs.h"
 
 File dataFile;
-/*
-* ==================== Write flight data to SD card =====================
-MICROSD MODULE PINOUT
-3V3 -> 3v3
-CS -> GPIO5
-MOSI -> GPIO23
-CLK -> GPIO18
-MISO -> GPIO19
-GND -> GND
-*/
-void readSD(const char *fileName)
-{
-    dataFile = SD.open(fileName);
-    if (dataFile)
-    {
-        Serial.println("Content:");
 
-        // read from the file until there's nothing else in it:
-        while (dataFile.available())
-        {
-            Serial.write(dataFile.read());
-        }
-        // close the file:
-        dataFile.close();
-    }
-    else
-    {
-
-        Serial.println("error opening test.txt");
-    }
-}
 void startWriting(const char *fileName)
 {
     dataFile = SD.open(fileName, FILE_WRITE);
     if (dataFile)
     {
-        Serial.print("Start writing to ");
-        Serial.println(fileName);
+        debug("Start writing to ");
+        debugln(fileName);
         dataFile.close();
     }
     else
     {
+        debugln("Error Opening ");
+        debugln(fileName);
 
-        Serial.println("Error Opening ");
-        Serial.println(fileName);
     }
 }
 
-// Append data to the SD card (DON'T MODIFY THIS FUNCTION)
-void appendToFile(const char *message, const char *fileName)
+char *printSDMessage(LogData ld)
 {
-    dataFile = SD.open(fileName, FILE_WRITE);
+    char *message = (char *)malloc(256);
+    if (!message)
+        return NULL;
+
+    sprintf(message, "{\"counter\":%d,\"sensor altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"filtered s\":%.3f,\"filtered v\":%.3f,\"filtered a\":%.3f,\"state\":%d,\"gps altitude\":%.3f,\"longitude\":%.8f,\"latitude\":%.8f}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.gpsAltitude, ld.longitude, ld.latitude);
+    return message;
+}
+
+// Append data to the SD card (DON'T MODIFY THIS FUNCTION)
+void appendToFile(LogData ld)
+{
+    char *message = printSDMessage(ld);
+    debugln(message);
+    dataFile = SD.open(telemetryLogFile, FILE_WRITE);
     if (!dataFile)
     {
-        Serial.println("Failed to open file for appending");
+        debugln("Failed to open file for appending");
         return;
     }
     if (dataFile.println(message))
     {
-        Serial.println("Message appended\n");
+        debugln("Message appended\n");
     }
     else
     {
-        Serial.println("Append failed");
+        debugln("Append failed");
     }
     dataFile.close();
 }

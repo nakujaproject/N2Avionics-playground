@@ -1,11 +1,11 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
-#define SEA_LEVEL_PRESSURE_HPA 1024
+
 #define SEA_LEVEL_PRESSURE 102400
 
 // Timing delays
-#define SETUP_DELAY 1000
+#define SETUP_DELAY 5000
 
 // define sd card VSPI
 #define SDCARD_CS_PIN 5
@@ -28,16 +28,21 @@
 
 #define BAUD_RATE 115200
 
-#define UDP_PORT 4210
-
-// value to detect lif off deviation
-#define LIFT_OFF_DEVIATION 2 // ideal: 50 cm
-
+// Pin to start ignition
 #define EJECTION_PIN 4
 
 const char *telemetryLogFile = "telemetry.txt";
-const char *gpsLogFile = "gps.txt";
 
+static float BASE_ALTITUDE;
+
+static float MAX_ALTITUDE;
+
+// Lora
+const long LORA_FREQ = 868E6; // frequechy 868 MHz
+const int LORA_SF = 7;        // spread factor
+const long LORA_BW = 125E3;   // bandwidth 125 kHz
+
+#define LORA_SYNC_WORD 0xF3
 struct LogData
 {
     int counter;
@@ -81,6 +86,13 @@ struct FilteredValues
     float displacement;
     float velocity;
     float acceleration;
+};
+
+struct SendValues
+{
+    uint64_t counter;
+    float altitude;
+    uint16_t state;
 };
 
 #endif

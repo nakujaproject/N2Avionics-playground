@@ -15,7 +15,6 @@
 #include <SPI.h>
 #include <LoRa.h>
 
-
 // using uart 2 for serial communication
 SoftwareSerial GPSModule(GPS_RX_PIN, GPS_TX_PIN); // RX, TX
 
@@ -115,7 +114,7 @@ void init_components(SPIClass &spi)
     {
         ;
     }
-    
+
     debugln("BMP180 FOUND");
 
     debugln("MPU6050 test!");
@@ -131,7 +130,7 @@ void init_components(SPIClass &spi)
     {
         ;
     }
-    
+
     debugln("MPU6050 FOUND");
     mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     mpu.setGyroRange(MPU6050_RANGE_500_DEG);
@@ -151,11 +150,12 @@ void init_components(SPIClass &spi)
         ;
     }
     debugln("SD CARD FOUND");
-    
-    startWriting(telemetryLogFile);
+
+    startWriting();
 
     debugln("LORA INITIALIZATION");
     debug("Setting up LoRa Sender...");
+
     LoRa.setPins(LORA_CS_PIN, RESET_LORA_PIN, IRQ_LORA_PIN); // set CS, reset, IRQ pin
     LoRa.setSPI(spi);
 
@@ -177,7 +177,6 @@ void init_components(SPIClass &spi)
     debug("SF :");
     debugln(SF);
     debugln("LORA FOUND");
-    
 }
 
 // Get the gps readings from the gps sensor
@@ -209,10 +208,10 @@ struct GPSReadings get_gps_readings()
         updates++;
         float lati = ConvertLat().toFloat();
         float lngi = ConvertLng().toFloat();
-        gpsReadings.latitude=lati;
-        gpsReadings.longitude=lngi;
+        gpsReadings.latitude = lati;
+        gpsReadings.longitude = lngi;
     }
-    
+
     stringplace = 0;
     pos = 0;
 

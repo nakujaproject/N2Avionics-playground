@@ -7,9 +7,9 @@
 
 File dataFile;
 
-void startWriting(const char *fileName)
+void startWriting()
 {
-    dataFile = SD.open(fileName, FILE_WRITE);
+    dataFile = SD.open(telemetryLogFile, FILE_WRITE);
     if (dataFile)
     {
         debug("Start writing to ");
@@ -18,19 +18,18 @@ void startWriting(const char *fileName)
     }
     else
     {
-        debugln("Error Opening ");
+        debug("Error Opening ");
         debugln(fileName);
-
     }
 }
 
 char *printSDMessage(LogData ld)
 {
-    char *message = (char *)malloc(256);
+    // The assigned size is calculated to fit the string
+    char *message = (char *)pvPortMalloc(sizeof(char) * 256);
     if (!message)
         return NULL;
-
-    sprintf(message, "{\"counter\":%d,\"sensor altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"filtered s\":%.3f,\"filtered v\":%.3f,\"filtered a\":%.3f,\"state\":%d,\"gps altitude\":%.3f,\"longitude\":%.8f,\"latitude\":%.8f}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.gpsAltitude, ld.longitude, ld.latitude);
+    snprintf(message, 256, "{\"counter\":%d,\"sensor altitude\":%.3f,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f,\"gx\":%.3f,\"gy\":%.3f,\"gz\":%.3f,\"filtered s\":%.3f,\"filtered v\":%.3f,\"filtered a\":%.3f,\"state\":%d,\"gps altitude\":%.3f,\"longitude\":%.8f,\"latitude\":%.8f}", ld.counter, ld.altitude, ld.ax, ld.ay, ld.az, ld.gx, ld.gy, ld.gz, ld.filtered_s, ld.filtered_v, ld.filtered_a, ld.state, ld.gpsAltitude, ld.longitude, ld.latitude);
     return message;
 }
 
@@ -54,6 +53,7 @@ void appendToFile(LogData ld)
         debugln("Append failed");
     }
     dataFile.close();
+    vPortFree(message);
 }
 
 #endif

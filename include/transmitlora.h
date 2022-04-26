@@ -10,7 +10,9 @@
 
 char *printLoraMessage(SendValues sv)
 {
-    char *message = (char *)malloc(48);
+    //The assigned size is calculated to fit the string
+    char *message = (char *)pvPortMalloc(48);
+    
     if (!message)
         return NULL;
     
@@ -28,7 +30,7 @@ void sendTelemetryLora(SendValues sv)
     LoRa.print(message);
     LoRa.endPacket();
     debugln("Done");
-    free(message);
+    vPortFree(message);
 }
 
 #endif

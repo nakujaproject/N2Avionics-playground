@@ -13,13 +13,13 @@ void startWriting()
     if (dataFile)
     {
         debug("Start writing to ");
-        debugln(fileName);
+        debugln(telemetryLogFile);
         dataFile.close();
     }
     else
     {
         debug("Error Opening ");
-        debugln(fileName);
+        debugln(telemetryLogFile);
     }
 }
 

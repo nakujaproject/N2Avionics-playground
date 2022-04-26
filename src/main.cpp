@@ -37,9 +37,9 @@ SPIClass *hspi = NULL;
 
 struct LogData readData()
 {
+    struct LogData ld;
     struct SensorReadings readings;
     struct FilteredValues filtered_values;
-    struct LogData ld;
     struct GPSReadings gpsReadings;
 
     readings = get_readings();
@@ -50,7 +50,6 @@ struct LogData readData()
     // using mutex since we are modifying a volatile var
 
     portENTER_CRITICAL_ISR(&mutex);
-    // TODO: why is the counter being passed here?
     state = checkState(filtered_values.displacement, filtered_values.velocity, state);
     portEXIT_CRITICAL_ISR(&mutex);
 
@@ -66,82 +65,7 @@ struct LogData readData()
     return ld;
 }
 
-void LoRaTelemetryTask(void *parameter)
-{
-
-    struct LogData ld;
-    for (;;)
-    {
-
-        // Ticks to wait has been optimized
-        if (xQueueReceive(telemetry_queue, (void *)&ld, 10) == pdTRUE)
-        {
-            appendToFile(ld);
-            struct SendValues sv;
-            sv = formart_send_data(ld);
-            sendTelemetryLora(sv);
-            appendToFile(ld);
-        }
-
-        // yield to another task
-        vTaskDelay(10 / portTICK_PERIOD_MS);
-        appendToFile(ld);
-    }
-}
-
-void LoRaReceiveCommandTask(void *parameter)
-{
-
-    struct LogData ld;
-    for (;;)
-    {
-
-        // check for incoming data stream
-        int packetSize = LoRa.parsePacket();
-        if (packetSize)
-        {
-            // received a packet
-
-            if (LoRa.available() > 0)
-            {
-                int command = LoRa.parseInt();
-
-                portENTER_CRITICAL_ISR(&mutex);
-                switch (command)
-                {
-                case 0:
-                    state = 0;
-                    break;
-                case 1:
-                    state = 1;
-                    break;
-                case 2:
-                    state = 2;
-                    break;
-                case 3:
-                    state = 3;
-                    break;
-                case 4:
-                    state = 4;
-                    break;
-                case 5:
-                    state = 5;
-                    break;
-                case 6:
-                    ejection();
-                    break;
-                default:
-                    break;
-                }
-                portEXIT_CRITICAL_ISR(&mutex);
-            }
-        }
-
-        // yield to another task
-        vTaskDelay(10 / portTICK_PERIOD_MS);
-    }
-}
-void ReadTelemetryTask(void *parameter)
+void GetDataTask(void *parameter)
 {
 
     struct LogData ld;
@@ -153,34 +77,43 @@ void ReadTelemetryTask(void *parameter)
         {
             debug("Queue Full!");
         }
-
-        // yield to another task
-        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
-// void SDLogTelemetryTask(void *parameter)
-// {
-//     struct LogData ld;
-//     for (;;)
-//     {
-//         if (xQueueReceive(telemetry_queue, (void *)&ld, 0) == pdTRUE)
-//         {
-//         }
+void LoRaTelemetryTask(void *parameter)
+{
 
-//         // yield to another task
-//         vTaskDelay(100 / portTICK_PERIOD_MS);
-//     }
-// }
-// void FlightControlTask(void *parameter)
-// {
-//     // TODO: implement flight control
-//     for (;;)
-//     {
-//     }
-//     // yield to another task
-//     vTaskDelay(100 / portTICK_PERIOD_MS);
-// }
+    struct LogData ld;
+    struct SendValues sv;
+    struct SendValues svRecords[5];
+
+    for (;;)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            xQueueReceive(telemetry_queue, (void *)&ld, 10);
+            sv = formart_send_data(ld);
+            svRecords[i] = sv;
+        }
+        sendTelemetryLora(svRecords);
+        // yield to another task
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+}
+
+void LoRaReceiveCommandTask(void *parameter)
+{
+
+    for (;;)
+    {
+        portENTER_CRITICAL_ISR(&mutex);
+        state = processInputCommand(state);
+        portEXIT_CRITICAL_ISR(&mutex);
+
+        // yield to another task
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+}
 
 void setup()
 {
@@ -203,7 +136,7 @@ void setup()
 
     // get the base_altitude
     SensorReadings readings = get_readings();
-    
+
     FilteredValues filtered_values = kalmanUpdate(readings.altitude, readings.ay);
 
     BASE_ALTITUDE = filtered_values.displacement;
@@ -215,12 +148,10 @@ void setup()
     // initialize core tasks
     // TODO: optimize the stackdepth
     xTaskCreatePinnedToCore(LoRaTelemetryTask, "LoRaTelemetryTask", 250, NULL, 1, &LoRaTelemetryTaskHandle, pro_cpu);
-    xTaskCreatePinnedToCore(ReadTelemetryTask, "ReadTelemetryTask", 250, NULL, 1, &ReadTelemetryTaskHandle, app_cpu);
+    xTaskCreatePinnedToCore(LoRaTelemetryTask, "LoRaTelemetryTask", 250, NULL, 1, &LoRaTelemetryTaskHandle, pro_cpu);
+    xTaskCreatePinnedToCore(GetDataTask, "GetDataTask", 250, NULL, 1, &ReadTelemetryTaskHandle, app_cpu);
 
-    // xTaskCreatePinnedToCore(LoRaReceiveCommandTask, "LoRaReceiveCommandTask", 250, NULL, 1, &LoRaReceiveCommandTaskHandle, pro_cpu);
-    // xTaskCreatePinnedToCore(SDLogTelemetryTask, "SDLogTelemetryTask", 250, NULL, 1, &SDLogTelemetryTaskHandle, app_cpu);
-    // xTaskCreatePinnedToCore(FlightControlTask, "FlightControlTask", 250, NULL, 1, &FlightControlTaskHandle, tskNO_AFFINITY);
-
+    xTaskCreatePinnedToCore(LoRaReceiveCommandTask, "LoRaReceiveCommandTask", 250, NULL, 2, &LoRaReceiveCommandTaskHandle, pro_cpu);
     // Delete "setup and loop" task
     vTaskDelete(NULL);
 }

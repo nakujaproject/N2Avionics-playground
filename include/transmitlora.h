@@ -14,23 +14,25 @@ char *printLoraMessage(SendValues sv)
     if (!message)
         return NULL;
 
-    sprintf(message, "{\"counter\":%d,\"state\":%d,\"altitude\":%.3f}\n", sv.counter, sv.state, sv.altitude);
+    sprintf(message, "{\"counter\":%lld,\"state\":%d,\"altitude\":%.3f}\n", sv.timeStamp, sv.state, sv.altitude);
     return message;
 }
 
 void sendTelemetryLora(SendValues sv[5])
 {
     LoRa.beginPacket();
-    for (int i = 0; i < 4; i++)
+
+    char combinedMessage[1280];
+    for (int i = 0; i < 5; i++)
     {
 
         char *message = printLoraMessage(sv[i]);
-        debugln(message);
-        LoRa.print(message);
+        sprintf(combinedMessage, message);
         vPortFree(message);
     }
+    debugln(combinedMessage);
+    LoRa.print(combinedMessage);
     // send packet
-
     LoRa.endPacket();
     debugln("Done");
 }
@@ -38,39 +40,48 @@ void sendTelemetryLora(SendValues sv[5])
 int processInputCommand(int currentState)
 {
 
-    // check for incoming data stream
-    int packetSize = LoRa.parsePacket();
-    if (packetSize)
+    // received a packet
+    if (LoRa.available() > 0)
     {
-        // received a packet
-        if (LoRa.available() > 0)
+        int command = LoRa.parseInt();
+        switch (command)
         {
-            int command = LoRa.parseInt();
-            switch (command)
-            {
-            case 0:
-                return 0;
-            case 1:
-                return 1;
-            case 2:
-                return 2;
-            case 3:
-                return 3;
-            case 4:
-                return 4;
-            default:
-                return 0;
-            }
-        }
-        else
-        {
-            return currentState;
+        case 0:
+            return 0;
+        case 1:
+            return 1;
+        case 2:
+            return 2;
+        case 3:
+            return 3;
+        case 4:
+            return 4;
+        default:
+            return 0;
         }
     }
     else
     {
         return currentState;
     }
+}
+
+int handleLora(int currentState, SendValues sv[5])
+{
+
+    int rval;
+    // check for incoming data stream
+    int packetSize = LoRa.parsePacket();
+    if (packetSize)
+    {
+        rval = processInputCommand(currentState);
+    }
+    else
+    {
+        sendTelemetryLora(sv);
+        rval = currentState;
+    }
+    return rval;
 }
 
 #endif

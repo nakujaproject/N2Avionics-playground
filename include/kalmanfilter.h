@@ -48,21 +48,22 @@ BLA::Matrix<2, 1> Y = {0.0,
 struct FilteredValues kalmanUpdate(float altitude, float acceleration)
 {
     struct FilteredValues return_val;
-    
-    //Measurement matrix
+
+    // Measurement matrix
     BLA::Matrix<2, 1> Z = {altitude,
                            acceleration};
-    //Predicted state estimate
+    // Predicted state estimate
     BLA::Matrix<3, 1> x_hat_minus = A * x_hat;
-    //Predicted estimate covariance
+    // Predicted estimate covariance
     BLA::Matrix<3, 3> P_minus = A * P * (~A) + Q;
-    //Kalman gain
-    BLA::Matrix<3, 2> K = P_minus * (~H) * ((H * P_minus * (~H) + R)).Inverse();
-    //Measurement residual
+    // Kalman gain
+    //  TODO Check Inverse() method
+    BLA::Matrix<3, 2> K = P_minus * (~H) * ((H * P_minus * (~H) + R));
+    // Measurement residual
     Y = Z - (H * x_hat_minus);
-    //Updated state estimate
+    // Updated state estimate
     x_hat = x_hat_minus + K * Y;
-    //Updated estimate covariance
+    // Updated estimate covariance
     P = (I - K * H) * P_minus;
     Y = Z - (H * x_hat_minus);
 

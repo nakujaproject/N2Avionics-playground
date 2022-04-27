@@ -5,7 +5,7 @@
 
 void ejection()
 {
-  //TODO: set timer here
+  // TODO: set timer here
   digitalWrite(EJECTION_PIN, HIGH);
 }
 
@@ -17,7 +17,7 @@ void done_ejection()
 struct LogData dummyData()
 {
   struct LogData ld;
-  ld.counter = 2;
+  ld.timeStamp = 2;
   ld.altitude = 10.5;
   ld.ax = 2.56;
   ld.ay = 2.65;
@@ -55,14 +55,26 @@ struct LogData formart_data(SensorReadings readings, FilteredValues filtered_val
 }
 
 // This formats data we are going to send
-// Currently we are sending altitude, state and counter
+// Currently we are sending altitude, state and timeStamp
 struct SendValues formart_send_data(LogData readings)
 {
   struct SendValues sv;
   sv.altitude = readings.altitude;
   sv.state = readings.state;
-  sv.counter = readings.counter;
+  sv.timeStamp = readings.timeStamp;
   return sv;
 }
 
+// Finds the average of the current altitude from 1000 readings
+float get_base_altitude()
+{
+  float altitude = 0;
+  SensorReadings readings;
+  for (int i = 0; i < 1000; i++)
+  {
+    readings = get_readings();
+    altitude = altitude + readings.altitude;
+  }
+  return altitude / 1000
+}
 #endif

@@ -53,7 +53,7 @@ const long LORA_BW = 125E3;   // bandwidth 125 kHz
 #define LORA_SYNC_WORD 0xF3
 struct LogData
 {
-    int counter;
+    uint64_t timeStamp;
     float altitude;
     float ax;
     float ay;
@@ -98,7 +98,7 @@ struct FilteredValues
 
 struct SendValues
 {
-    uint64_t counter;
+    uint64_t timeStamp;
     float altitude;
     uint16_t state;
 };

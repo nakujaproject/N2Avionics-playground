@@ -26,7 +26,6 @@ int checkApogee(float velocity, float altitude)
   if (velocity < 0)
   {
     // Fire ejection charge
-    //TODO: this function might be called more than once
     ejection();
     MAX_ALTITUDE = altitude;
     return 2;
@@ -54,7 +53,7 @@ int checkDescent(float altitude)
 
 // This checks that we have reached the ground
 // detects landing of the rocket
-//TODO: BASE_ALTITUDE might be different from the original base altitude
+// TODO: BASE_ALTITUDE might be different from the original base altitude
 int checkGround(float altitude)
 {
   float displacement = altitude - BASE_ALTITUDE;

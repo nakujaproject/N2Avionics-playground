@@ -17,16 +17,13 @@ static const BaseType_t app_cpu = 1;
 
 TaskHandle_t LoRaTelemetryTaskHandle;
 
-TaskHandle_t ReadTelemetryTaskHandle;
+TaskHandle_t GetDataTaskHandle;
 
-TaskHandle_t SDLogTelemetryTaskHandle;
+TaskHandle_t SDWriteTaskHandle;
 
-TaskHandle_t FlightControlTaskHandle;
-
-TaskHandle_t LoRaReceiveCommandTaskHandle;
-
-static uint8_t telemetry_queue_length = 10;
+static uint8_t queue_length = 10;
 static QueueHandle_t telemetry_queue;
+static QueueHandle_t sdwrite_queue;
 
 portMUX_TYPE mutex = portMUX_INITIALIZER_UNLOCKED;
 
@@ -49,9 +46,9 @@ struct LogData readData()
 
     // using mutex since we are modifying a volatile var
 
-    portENTER_CRITICAL_ISR(&mutex);
+    portENTER_CRITICAL(&mutex);
     state = checkState(filtered_values.displacement, filtered_values.velocity, state);
-    portEXIT_CRITICAL_ISR(&mutex);
+    portEXIT_CRITICAL(&mutex);
 
     // if we reach ground state we can start reading gpsData
     if (state == 4)
@@ -61,6 +58,7 @@ struct LogData readData()
 
     ld = formart_data(readings, filtered_values, gpsReadings);
     ld.state = state;
+    ld.timeStamp = micros();
 
     return ld;
 }
@@ -69,13 +67,19 @@ void GetDataTask(void *parameter)
 {
 
     struct LogData ld;
+    struct SendValues sv;
     for (;;)
     {
 
         ld = readData();
-        if (xQueueSend(telemetry_queue, (void *)&ld, 0) != pdTRUE)
+        sv = formart_send_data(ld);
+        if (xQueueSend(telemetry_queue, (void *)&sv, 0) != pdTRUE)
         {
-            debug("Queue Full!");
+            debug("Telemetry Queue Full!");
+        }
+        if (xQueueSend(sdwrite_queue, (void *)&ld, 0) != pdTRUE)
+        {
+            debug("SD card Queue Full!");
         }
     }
 }
@@ -83,7 +87,6 @@ void GetDataTask(void *parameter)
 void LoRaTelemetryTask(void *parameter)
 {
 
-    struct LogData ld;
     struct SendValues sv;
     struct SendValues svRecords[5];
 
@@ -91,25 +94,31 @@ void LoRaTelemetryTask(void *parameter)
     {
         for (int i = 0; i < 4; i++)
         {
-            xQueueReceive(telemetry_queue, (void *)&ld, 10);
-            sv = formart_send_data(ld);
+            xQueueReceive(telemetry_queue, (void *)&sv, 10);
             svRecords[i] = sv;
         }
-        sendTelemetryLora(svRecords);
+        portENTER_CRITICAL(&mutex);
+        state = handleLora(state, svRecords);
+        portEXIT_CRITICAL(&mutex);
         // yield to another task
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
 
-void LoRaReceiveCommandTask(void *parameter)
+void SDWriteTask(void *parameter)
 {
+
+    struct LogData ld;
+    struct LogData ldRecords[5];
 
     for (;;)
     {
-        portENTER_CRITICAL_ISR(&mutex);
-        state = processInputCommand(state);
-        portEXIT_CRITICAL_ISR(&mutex);
-
+        for (int i = 0; i < 4; i++)
+        {
+            xQueueReceive(sdwrite_queue, (void *)&ld, 10);
+            ldRecords[i] = ld;
+        }
+        appendToFile(ldRecords);
         // yield to another task
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
@@ -135,23 +144,20 @@ void setup()
     init_components(spi);
 
     // get the base_altitude
-    SensorReadings readings = get_readings();
-
-    FilteredValues filtered_values = kalmanUpdate(readings.altitude, readings.ay);
-
-    BASE_ALTITUDE = filtered_values.displacement;
+    BASE_ALTITUDE = get_base_altitude();
 
     delay(SETUP_DELAY);
 
-    telemetry_queue = xQueueCreate(telemetry_queue_length, sizeof(LogData));
+    telemetry_queue = xQueueCreate(queue_length, sizeof(SendValues));
+    sdwrite_queue = xQueueCreate(queue_length, sizeof(LogData));
 
     // initialize core tasks
     // TODO: optimize the stackdepth
     xTaskCreatePinnedToCore(LoRaTelemetryTask, "LoRaTelemetryTask", 250, NULL, 1, &LoRaTelemetryTaskHandle, pro_cpu);
-    xTaskCreatePinnedToCore(LoRaTelemetryTask, "LoRaTelemetryTask", 250, NULL, 1, &LoRaTelemetryTaskHandle, pro_cpu);
-    xTaskCreatePinnedToCore(GetDataTask, "GetDataTask", 250, NULL, 1, &ReadTelemetryTaskHandle, app_cpu);
+    xTaskCreatePinnedToCore(SDWriteTask, "SDWriteTask", 250, NULL, 1, &SDWriteTaskHandle, pro_cpu);
+    xTaskCreatePinnedToCore(GetDataTask, "GetDataTask", 250, NULL, 1, &GetDataTaskHandle, app_cpu);
 
-    xTaskCreatePinnedToCore(LoRaReceiveCommandTask, "LoRaReceiveCommandTask", 250, NULL, 2, &LoRaReceiveCommandTaskHandle, pro_cpu);
     // Delete "setup and loop" task
     vTaskDelete(NULL);
 }
+void loop() {}

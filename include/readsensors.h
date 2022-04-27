@@ -171,11 +171,11 @@ void init_components(SPIClass &spi)
     LoRa.setSignalBandwidth(LORA_BW);
     LoRa.setSyncWord(LORA_SYNC_WORD);
     debug("Frequency :");
-    debug(freq);
+    debug(LORA_FREQ);
     debug("Bandwidth :");
-    debug(bw);
+    debug(LORA_BW);
     debug("SF :");
-    debugln(SF);
+    debugln(LORA_SF);
     debugln("LORA FOUND");
 }
 
@@ -218,7 +218,7 @@ struct GPSReadings get_gps_readings()
     return gpsReadings;
 }
 
-// Get the mpu readings
+// Get the sensor readings
 struct SensorReadings get_readings()
 {
     struct SensorReadings return_val;

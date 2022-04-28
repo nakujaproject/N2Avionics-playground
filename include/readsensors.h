@@ -97,9 +97,9 @@ String ConvertLng()
 void init_components(SPIClass &spi)
 {
 
-    debugln("GPS INITIALIZATION");
-    GPSModule.begin(9600);
-    debugln("GPS FOUND");
+    // debugln("GPS INITIALIZATION");
+    // GPSModule.begin(9600);
+    // debugln("GPS FOUND");
 
     debugln("BMP180 INITIALIZATION");
     if (!bmp.begin())
@@ -150,8 +150,6 @@ void init_components(SPIClass &spi)
         ;
     }
     debugln("SD CARD FOUND");
-
-    startWriting();
 
     debugln("LORA INITIALIZATION");
     debug("Setting up LoRa Sender...");

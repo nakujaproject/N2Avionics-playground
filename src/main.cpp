@@ -70,6 +70,7 @@ void GetDataTask(void *parameter)
     struct SendValues sv;
     for (;;)
     {
+        debugln("getdata task" );
 
         ld = readData();
         sv = formart_send_data(ld);
@@ -86,13 +87,15 @@ void GetDataTask(void *parameter)
 
 void LoRaTelemetryTask(void *parameter)
 {
+    
 
     struct SendValues sv;
     struct SendValues svRecords[5];
 
     for (;;)
     {
-        for (int i = 0; i < 4; i++)
+        debugln("lora task");
+        for (int i = 0; i < 5; i++)
         {
             xQueueReceive(telemetry_queue, (void *)&sv, 10);
             svRecords[i] = sv;
@@ -113,7 +116,8 @@ void SDWriteTask(void *parameter)
 
     for (;;)
     {
-        for (int i = 0; i < 4; i++)
+        debugln("SD task");
+        for (int i = 0; i < 5; i++)
         {
             xQueueReceive(sdwrite_queue, (void *)&ld, 10);
             ldRecords[i] = ld;
@@ -146,16 +150,14 @@ void setup()
     // get the base_altitude
     BASE_ALTITUDE = get_base_altitude();
 
-    delay(SETUP_DELAY);
-
     telemetry_queue = xQueueCreate(queue_length, sizeof(SendValues));
     sdwrite_queue = xQueueCreate(queue_length, sizeof(LogData));
 
     // initialize core tasks
     // TODO: optimize the stackdepth
-    xTaskCreatePinnedToCore(LoRaTelemetryTask, "LoRaTelemetryTask", 250, NULL, 1, &LoRaTelemetryTaskHandle, pro_cpu);
-    xTaskCreatePinnedToCore(SDWriteTask, "SDWriteTask", 250, NULL, 1, &SDWriteTaskHandle, pro_cpu);
-    xTaskCreatePinnedToCore(GetDataTask, "GetDataTask", 250, NULL, 1, &GetDataTaskHandle, app_cpu);
+    xTaskCreatePinnedToCore(LoRaTelemetryTask, "LoRaTelemetryTask", 10000, NULL, 1, &LoRaTelemetryTaskHandle, pro_cpu);
+    xTaskCreatePinnedToCore(SDWriteTask, "SDWriteTask", 10000, NULL, 1, &SDWriteTaskHandle, pro_cpu);
+    xTaskCreatePinnedToCore(GetDataTask, "GetDataTask", 10000, NULL, 1, &GetDataTaskHandle, app_cpu);
 
     // Delete "setup and loop" task
     vTaskDelete(NULL);

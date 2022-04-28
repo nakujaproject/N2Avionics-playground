@@ -16,21 +16,21 @@
 #define SETUP_DELAY 5000
 
 // define sd card VSPI
-#define SDCARD_CS_PIN 5
-#define SD_MOSI_PIN 23
-#define SD_MISO_PIN 19
-#define SD_SCK_PIN 18
+const uint8_t SDCARD_CS_PIN =  5;
+const uint8_t SD_MOSI_PIN = 23;
+const uint8_t SD_MISO_PIN = 19;
+const uint8_t SD_SCK_PIN = 18;
 
-// define lora HSPI
-#define LORA_CS_PIN 15
-#define LORA_MOSI_PIN 13
-#define LORA_MISO_PIN 12
-#define LORA_SCK_PIN 14
-#define RESET_LORA_PIN 25
-#define IRQ_LORA_PIN 2
+// lora HSPI
+const uint8_t LORA_CS_PIN = 15;
+const uint8_t LORA_MOSI_PIN = 13;
+const uint8_t LORA_MISO_PIN = 12;
+const uint8_t LORA_SCK_PIN = 14;
+const uint8_t RESET_LORA_PIN = 25;
+const uint8_t IRQ_LORA_PIN = 2;
 
-#define GPS_TX_PIN 17
-#define GPS_RX_PIN 16
+const uint8_t GPS_TX_PIN = 17;
+const uint8_t GPS_RX_PIN = 16;
 
 #define SHORT_DELAY 10
 
@@ -39,7 +39,6 @@
 // Pin to start ignition
 #define EJECTION_PIN 4
 
-const char *telemetryLogFile = "telemetry.txt";
 
 static float BASE_ALTITUDE;
 

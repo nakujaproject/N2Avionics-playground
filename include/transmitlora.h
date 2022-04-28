@@ -9,12 +9,12 @@
 char *printLoraMessage(SendValues sv)
 {
     // The assigned size is calculated to fit the string
-    char *message = (char *)pvPortMalloc(48);
+    char *message = (char *)pvPortMalloc(60);
 
     if (!message)
         return NULL;
 
-    sprintf(message, "{\"counter\":%lld,\"state\":%d,\"altitude\":%.3f}\n", sv.timeStamp, sv.state, sv.altitude);
+    snprintf(message,60, "{\"timestamp\":%lld,\"state\":%d,\"altitude\":%.3f}\n", sv.timeStamp, sv.state, sv.altitude);
     return message;
 }
 
@@ -22,12 +22,13 @@ void sendTelemetryLora(SendValues sv[5])
 {
     LoRa.beginPacket();
 
-    char combinedMessage[1280];
+    char combinedMessage[300];
+    strcpy(combinedMessage, "");
     for (int i = 0; i < 5; i++)
     {
 
         char *message = printLoraMessage(sv[i]);
-        sprintf(combinedMessage, message);
+        strcat(combinedMessage, message);
         vPortFree(message);
     }
     debugln(combinedMessage);

@@ -1,7 +1,9 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#include "defs.h" // header file containing constants
+#include "defs.h" 
+#include "readsensors.h" 
+
 
 void ejection()
 {
@@ -75,6 +77,6 @@ float get_base_altitude()
     readings = get_readings();
     altitude = altitude + readings.altitude;
   }
-  return altitude / 1000
+  return altitude / 1000;
 }
 #endif

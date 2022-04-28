@@ -7,6 +7,7 @@
 
 File dataFile;
 
+// startWriting starts writing to the logfile
 void startWriting()
 {
     dataFile = SD.open(telemetryLogFile, FILE_WRITE);
@@ -23,6 +24,8 @@ void startWriting()
     }
 }
 
+// printSDMessage formats the logdata message into an
+// acceptable string format to be printed on to the file
 char *printSDMessage(LogData ld)
 {
     // The assigned size is calculated to fit the string

@@ -93,7 +93,7 @@ String ConvertLng()
     return lngfirst;
 }
 
-// function to initialize bmp, mpu and the sd card module
+// function to initialize bmp, mpu, lora module and the sd card module
 void init_components(SPIClass &spi)
 {
 

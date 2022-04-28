@@ -4,18 +4,22 @@
 #include "defs.h" // header file containing constants
 #include "readsensors.h"
 
-void ejection()
+// Ejection Fires the explosive charge using a relay or a mosfet
+void Ejection()
 {
   // TODO: set timer here
   digitalWrite(EJECTION_PIN, HIGH);
 }
 
-void done_ejection()
+// Done_ejection turns of the pin that fired the ejection charge
+void Done_ejection()
 {
   digitalWrite(EJECTION_PIN, LOW);
 }
 
-struct LogData dummyData()
+// DummyData returns a dummy data sample for LogData
+// This is helpful for analysis
+struct LogData DummyData()
 {
   struct LogData ld;
   ld.timeStamp = 2;
@@ -35,7 +39,8 @@ struct LogData dummyData()
   return ld;
 }
 
-// This formats data that we are going to save to memory
+// formart_data This formats data that we are going to save to SD card
+// We pass in our SensorReadings, FilteredValues and GPSReadings
 // We save all the data points we are collecting
 struct LogData formart_data(SensorReadings readings, FilteredValues filtered_values, GPSReadings gpsReadings)
 {
@@ -55,7 +60,7 @@ struct LogData formart_data(SensorReadings readings, FilteredValues filtered_val
   return ld;
 }
 
-// This formats data we are going to send
+// formart_send_data This formats data we are going to send over LoRa
 // Currently we are sending altitude, state and timeStamp
 struct SendValues formart_send_data(LogData readings)
 {
@@ -66,7 +71,7 @@ struct SendValues formart_send_data(LogData readings)
   return sv;
 }
 
-// Finds the average of the current altitude from 1000 readings
+// get_base_altitude Finds the average of the current altitude from 1000 readings
 float get_base_altitude()
 {
   float altitude = 0;
@@ -75,6 +80,7 @@ float get_base_altitude()
   {
     readings = get_readings();
     altitude = altitude + readings.altitude;
+    delay(SHORT_DELAY);
   }
   return altitude / 1000.0;
 }

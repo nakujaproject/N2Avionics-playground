@@ -29,6 +29,7 @@
 #define RESET_LORA_PIN 25
 #define IRQ_LORA_PIN 2
 
+// define GPS UART pins
 #define GPS_TX_PIN 17
 #define GPS_RX_PIN 16
 
@@ -45,12 +46,17 @@ static float BASE_ALTITUDE;
 
 static float MAX_ALTITUDE;
 
-// Lora
+// Lora paramters
 const long LORA_FREQ = 868E6; // frequechy 868 MHz
 const int LORA_SF = 7;        // spread factor
 const long LORA_BW = 125E3;   // bandwidth 125 kHz
 
 #define LORA_SYNC_WORD 0xF3
+// This struct is used to save all our datapoints.
+// It includes rocket altitude, accelerations in the x, y and z directions
+// Gryroscope values in the x, y and z direcion
+// filtered altitude, velocity and acceleration
+// GPS longitude, laltitude and altitude and state
 struct LogData
 {
     uint64_t timeStamp;
@@ -69,7 +75,8 @@ struct LogData
     float longitude;
     float gpsAltitude;
 };
-
+// SensorReadings contains the measurement we are getting
+// from the sensors bmp and mpu
 struct SensorReadings
 {
     float altitude;
@@ -80,6 +87,8 @@ struct SensorReadings
     float gy;
     float gz;
 };
+// GPSReadings contains the gps informations that is
+// latitude, longitude, speed, number of satellites and altitude
 struct GPSReadings
 {
     float latitude;
@@ -89,13 +98,14 @@ struct GPSReadings
     float altitude;
 };
 
+// FilteredValues contains filtered values from the kalman filter
 struct FilteredValues
 {
     float displacement;
     float velocity;
     float acceleration;
 };
-
+// SendValues contains the data points we will be sending over lora
 struct SendValues
 {
     uint64_t timeStamp;

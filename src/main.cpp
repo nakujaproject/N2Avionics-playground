@@ -38,7 +38,7 @@ volatile int state = 0;
 
 static uint8_t lora_queue_length = 100;
 static uint8_t wifi_queue_length = 100;
-static uint8_t sd_queue_length = 100;
+static uint8_t sd_queue_length = 150;
 static uint8_t gps_queue_length = 100;
 
 static QueueHandle_t lora_telemetry_queue;
@@ -123,8 +123,8 @@ void readGPSTask(void *parameter)
     for (;;)
     {
         gpsReadings = get_gps_readings();
-        debugf("latitude %.3f\n",gpsReadings.latitude);
-        debugf("longitude %.3f\n",gpsReadings.longitude);
+        // debugf("latitude %.8f\n",gpsReadings.latitude);
+        // debugf("longitude %.8f\n",gpsReadings.longitude);
         
         if (xQueueSend(gps_queue, (void *)&gpsReadings, 0) != pdTRUE)
         {
@@ -268,10 +268,10 @@ void setup()
     // initialize core tasks
     // TODO: optimize the stackdepth
     // xTaskCreatePinnedToCore(LoRaTelemetryTask, "LoRaTelemetryTask", 3000, NULL, 1, &LoRaTelemetryTaskHandle, 0);
-    //xTaskCreatePinnedToCore(GetDataTask, "GetDataTask", 3000, NULL, 1, &GetDataTaskHandle, 1);
-   // xTaskCreatePinnedToCore(WiFiTelemetryTask, "WiFiTelemetryTask", 3000, NULL, 1, &WiFiTelemetryTaskHandle, 1);
-    xTaskCreatePinnedToCore(readGPSTask, "ReadGPSTask", 3000, NULL, tskIDLE_PRIORITY, &GPSTaskHandle, 0);
-    // xTaskCreatePinnedToCore(SDWriteTask, "SDWriteTask", 4000, NULL, tskIDLE_PRIORITY, &SDWriteTaskHandle, 0);
+    xTaskCreatePinnedToCore(GetDataTask, "GetDataTask", 3000, NULL, 1, &GetDataTaskHandle, 0);
+    xTaskCreatePinnedToCore(WiFiTelemetryTask, "WiFiTelemetryTask", 3000, NULL, 1, &WiFiTelemetryTaskHandle, 0);
+    xTaskCreatePinnedToCore(readGPSTask, "ReadGPSTask", 3000, NULL, 1, &GPSTaskHandle, 1);
+     xTaskCreatePinnedToCore(SDWriteTask, "SDWriteTask", 4000, NULL, 1, &SDWriteTaskHandle, 1);
 
     // Delete setup and loop tasks
     vTaskDelete(NULL);

@@ -2,8 +2,8 @@
 #define TRANSMITWIFI_H
 
 #include <WiFiUdp.h>
-#include <WebServer.h>
 #include <ArduinoJson.h>
+#include <AsyncMqttClient.h>
 #include <WiFi.h>
 #include "defs.h"
 #include "functions.h"
@@ -23,7 +23,7 @@ char *printTransmitMessageWiFi(SendValues sv)
 
 //************METHOD I using UDP no server***********************
 
-void sendTelemetryWiFi(SendValues sv[5])
+void sendTelemetryWiFi(SendValues sv[5], AsyncMqttClient mqttClient)
 {
   // send a broadcast to all clients in the local network
   Udp.beginPacket({192, 168, 4, 255}, UDP_PORT);
@@ -39,6 +39,12 @@ void sendTelemetryWiFi(SendValues sv[5])
     vPortFree(message);
   }
   debugln(combinedMessage);
+
+  // Publish an MQTT message on topic esp/bme680/temperature
+  uint16_t packetIdPub1 = mqttClient.publish(MQTT_PUB_TOPIC, 1, true, String(combinedMessage).c_str());
+  debugf("Publishing packetId: %i", packetIdPub1);
+
+
   Udp.print(combinedMessage);
   if (Udp.endPacket())
   {
@@ -86,7 +92,7 @@ void processInputCommandWiFi()
   }
 }
 
-void handleWiFi(SendValues sv[5])
+void handleWiFi(SendValues sv[5], AsyncMqttClient mqttClient)
 {
 
   // check for incoming data stream
@@ -97,7 +103,7 @@ void handleWiFi(SendValues sv[5])
   }
   else
   {
-    sendTelemetryWiFi(sv);
+    sendTelemetryWiFi(sv, mqttClient);
   }
 }
 

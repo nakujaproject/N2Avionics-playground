@@ -11,6 +11,9 @@
 #include "../include/transmitwifi.h"
 #include "../include/defs.h"
 #include <SPI.h>
+#include <AsyncMqttClient.h>
+
+AsyncMqttClient mqttClient;
 
 static const BaseType_t pro_cpu = 0;
 
@@ -66,6 +69,27 @@ void ejection()
         ejectionTimerHandle = xTimerCreate("EjectionTimer", 3000 / portTICK_PERIOD_MS, pdFALSE, (void *)0, ejectionTimerCallback);
         xTimerStart(ejectionTimerHandle, portMAX_DELAY);
     }
+}
+
+void connectToMqtt() {
+  debugln("Connecting to MQTT...");
+  mqttClient.connect();
+}
+
+void onMqttConnect(bool sessionPresent) {
+  debugln("Connected to MQTT.");
+  debug("Session present: ");
+  debugln(sessionPresent);
+}
+
+void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
+  debugln("Disconnected from MQTT.");
+}
+
+void onMqttPublish(uint16_t packetId) {
+  debug("Publish acknowledged.");
+  debug("  packetId: ");
+  debugln(packetId);
 }
 
 struct LogData readData()
@@ -160,7 +184,7 @@ void WiFiTelemetryTask(void *parameter)
                 longitude = gpsReadings.longitude;
             }
         }
-        handleWiFi(svRecords);
+        handleWiFi(svRecords, mqttClient);
 
         // yield to other task such as IDLE task
         vTaskDelay(36 / portTICK_PERIOD_MS);
@@ -246,12 +270,22 @@ void setup()
     // set up parachute pin
     pinMode(EJECTION_PIN, OUTPUT);
 
+    createAccessPoint();
+
+    mqttClient.onConnect(onMqttConnect);
+    mqttClient.onDisconnect(onMqttDisconnect);
+    mqttClient.onPublish(onMqttPublish);
+    mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+    mqttClient.setCredentials(MQTT_USERNAME, MQTT_PASSWORD);
+    mqttClient.connect();
+
     hspi = new SPIClass(HSPI);
     hspi->begin();
 
     SPIClass &spi = *hspi;
 
     init_components(spi);
+
 
     // get the base_altitude
     BASE_ALTITUDE = get_base_altitude();
@@ -269,9 +303,9 @@ void setup()
     // TODO: optimize the stackdepth
     // xTaskCreatePinnedToCore(LoRaTelemetryTask, "LoRaTelemetryTask", 3000, NULL, 1, &LoRaTelemetryTaskHandle, 0);
     xTaskCreatePinnedToCore(GetDataTask, "GetDataTask", 3000, NULL, 1, &GetDataTaskHandle, 0);
-    xTaskCreatePinnedToCore(WiFiTelemetryTask, "WiFiTelemetryTask", 3000, NULL, 1, &WiFiTelemetryTaskHandle, 0);
+    xTaskCreatePinnedToCore(WiFiTelemetryTask, "WiFiTelemetryTask", 4000, NULL, 1, &WiFiTelemetryTaskHandle, 0);
     xTaskCreatePinnedToCore(readGPSTask, "ReadGPSTask", 3000, NULL, 1, &GPSTaskHandle, 1);
-     xTaskCreatePinnedToCore(SDWriteTask, "SDWriteTask", 4000, NULL, 1, &SDWriteTaskHandle, 1);
+    xTaskCreatePinnedToCore(SDWriteTask, "SDWriteTask", 4000, NULL, 1, &SDWriteTaskHandle, 1);
 
     // Delete setup and loop tasks
     vTaskDelete(NULL);

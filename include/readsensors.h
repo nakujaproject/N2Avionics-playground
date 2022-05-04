@@ -43,7 +43,6 @@ void init_components(SPIClass &spi)
 {
 
     GPSModule.begin(9600);
-    createAccessPoint();
 
     debugln("BMP180 INITIALIZATION");
     if (!bmp.begin())

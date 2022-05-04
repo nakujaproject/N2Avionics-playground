@@ -40,6 +40,13 @@ const uint8_t GPS_RX_PIN = 16;
 const char *ssid = "appendix";
 const char *key = "123456789";
 
+// Raspberry Pi Mosquitto MQTT Broker
+#define MQTT_HOST IPAddress(192, 168, 4, 2)
+#define MQTT_PORT 1883
+#define MQTT_PUB_TOPIC "onboard/data"
+#define MQTT_USERNAME "user"
+#define MQTT_PASSWORD "password"
+
 WiFiUDP Udp;
 WebServer server(80);
 

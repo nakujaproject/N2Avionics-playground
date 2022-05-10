@@ -1,0 +1,40 @@
+
+Redundancy Ics
+
+BMP 388 
+
+Digital sensor with pressure and temperature measurement
+
+24-bit 
+voltage 1.65 V to 3.6 V VDD
+current consumption 3.4 uA at 1Hz, 2uA in sleep mode
+relative accuracy -/+ 8 Pa, -/+ 0.66m
+measurement range 300hPa to 1250 hPa
+temp range -20 to 65 Degrees Celsius
+
+Associated components
+-25V 100nF ±10% Multilayer Ceramic Capacitors MLCC - SMD/SMT
+
+
+
+
+
+
+MPU 9250
+
+>> Gyroscope, Accelerometer, Magnetometer
+   Acceleration, Velocity, Orientation, Displacement measurement 
+
+>> An improvement of 6050 + AK8963 (3 axis magnetometer)
+>>MPU6050 is based on Micro Electro-Mechanical Systems (MEMS) technology. 
+  This sensor has a 3-axis accelerometer, a 3-axis gyroscope, and an in-built temperature sensor.
+
+
+3.3V/5V
+I2c, SPI
+3.5mA operating current when all 9 motion sensing axes and the DMP are enabled
+
+Associated components
+-Thick Film Resistors 4.7kΩ - Surface Mount
+-Ceramic Capacitors MLCC - SMD/SMT
+
